@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ Zapret Control
+# ![](Assets/app.png)  Zapret Control
 
 GUI-обёртка для [zapret-discord-youtube](https://github.com/flowseal/zapret-discord-youtube) под Windows.
 
