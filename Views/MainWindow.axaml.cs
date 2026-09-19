@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using ZapretGui.ViewModels;
@@ -7,11 +8,25 @@ namespace ZapretGui.Views;
 public partial class MainWindow : Window
 {
     private bool _isExplicitExit;
+    private bool _startHidden;
 
-    public MainWindow()
+    public MainWindow() : this(false) { }
+
+    public MainWindow(bool startHidden)
     {
+        _startHidden = startHidden;
         DataContext = new MainViewModel();
         InitializeComponent();
+    }
+
+    protected override void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+        if (_startHidden)
+        {
+            _startHidden = false;
+            Hide();
+        }
     }
 
     private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)

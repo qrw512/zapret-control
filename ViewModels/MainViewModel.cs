@@ -18,77 +18,104 @@ namespace ZapretGui.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     private readonly UpdateService _updateService = new();
+    private readonly SelfUpdateService _selfUpdateService = new();
+    private SelfUpdateInfo? _pendingSelfUpdate;
     private readonly ZapretManager _zapretManager = new();
     private readonly ConfigService _configService = new();
+
     private AppConfig _config;
+    private Func<string>? _updateStatusFactory;
+    public LocalizationService Loc => LocalizationService.Instance;
+
     private bool _suppressServiceSync;
     private bool _suppressGameFilterSync;
     private bool _suppressThemeSync;
-    private Func<string>? _updateStatusFactory;
+    private bool _hasLastResult;
+    private bool _suppressStartWithWindows;
+    private bool _suppressAutoStartBypass;
+    
     private string _lastTestTitle = string.Empty;
     private string _lastTestSubtitle = string.Empty;
     private string _lastTestBody = string.Empty;
-    private bool _hasLastResult;
-    public LocalizationService Loc => LocalizationService.Instance;
-    
 
     [ObservableProperty] private bool _isTestModalOpen;
     [ObservableProperty] private string _testModalTitle = string.Empty;
     [ObservableProperty] private string _testModalSubtitle = string.Empty;
     [ObservableProperty] private string _testModalBody = string.Empty;
-
     [ObservableProperty] private bool _isAnyTestRunning;
+    [ObservableProperty] private string _zapretFolderPath = AppPaths.Versions;
+    [ObservableProperty] private ServiceViewModel _serviceViewModel;
+    [ObservableProperty] private ObservableCollection<ZapretPreset> _presets = new();
+    [ObservableProperty] private ZapretPreset? _selectedPreset;
+    [ObservableProperty] private string _serviceStatusText = string.Empty;
+    [ObservableProperty] private bool _isServiceRunning;
+    [ObservableProperty] private string _updateStatusText = string.Empty;
+    [ObservableProperty] private bool _isUpdating;
+    [ObservableProperty] private bool _isUpdateAvailable;
+    [ObservableProperty] private bool _isSelfUpdateOpen;
+    [ObservableProperty] private string _selfUpdateMessage = string.Empty;
+    [ObservableProperty] private bool _isSelfUpdateDownloading;
+    [ObservableProperty] private bool _isSettingsOpen;
+    [ObservableProperty] private bool _isAboutOpen;
+    [ObservableProperty] private string _selfUpdateStatusText = string.Empty;
+    [ObservableProperty] private bool _isServiceInstalled;
+    [ObservableProperty] private int _gameFilterModeIndex;
+    [ObservableProperty] private int _themeIndex;
+    [ObservableProperty] private bool _startWithWindows;
+    [ObservableProperty] private bool _autoStartBypass;
+    [ObservableProperty] private ObservableCollection<string> _gameFilterOptions = new();
+    [ObservableProperty] private ObservableCollection<string> _themeOptions = new();
+    [ObservableProperty] private string _settingsStatusText = string.Empty;
+    public bool IsSelfUpdateReady => !IsSelfUpdateDownloading;
+    public string AppVersion => "v" + _selfUpdateService.GetCurrentVersion();
 
-    [ObservableProperty]
-    private string _zapretFolderPath = AppPaths.Versions;
-
-    [ObservableProperty]
-    private ServiceViewModel _serviceViewModel;
-
-    [ObservableProperty]
-    private ObservableCollection<ZapretPreset> _presets = new();
-
-    [ObservableProperty]
-    private ZapretPreset? _selectedPreset;
-
-    [ObservableProperty]
-    private string _serviceStatusText = string.Empty;
-
-    [ObservableProperty]
-    private bool _isServiceRunning;
-
-    [ObservableProperty]
-    private string _updateStatusText = string.Empty;
-
-    [ObservableProperty]
-    private bool _isUpdating;
-
-    [ObservableProperty]
-    private bool _isUpdateAvailable;
-
-    [ObservableProperty]
-    private bool _isSettingsOpen;
-
-    [ObservableProperty]
-    private bool _isServiceInstalled;
-
-    [ObservableProperty]
-    private int _gameFilterModeIndex;
-
-    [ObservableProperty]
-    private int _themeIndex;
-
-    [ObservableProperty]
-    private ObservableCollection<string> _gameFilterOptions = new();
-
-    [ObservableProperty]
-    private ObservableCollection<string> _themeOptions = new();
-
-    [ObservableProperty]
-    private string _settingsStatusText = string.Empty;
+    partial void OnIsSelfUpdateDownloadingChanged(bool value)
+    => OnPropertyChanged(nameof(IsSelfUpdateReady));
+    public Action? RequestExit { get; set; }
 
     public string SelectedPresetText =>
         SelectedPreset == null ? string.Empty : string.Format(Loc["SelectedFormat"], SelectedPreset.Name);
+    
+    public bool IsBypassPage   => !IsSettingsOpen && !ServiceViewModel.IsOpen && !IsAboutOpen;
+    public bool IsToolsPage    => ServiceViewModel.IsOpen;
+    public bool IsSettingsPage => IsSettingsOpen;
+    public bool IsAboutPage    => IsAboutOpen;
+
+    private void RaisePageFlags()
+    {
+        OnPropertyChanged(nameof(IsBypassPage));
+        OnPropertyChanged(nameof(IsToolsPage));
+        OnPropertyChanged(nameof(IsSettingsPage));
+        OnPropertyChanged(nameof(IsAboutPage));
+    }
+
+    partial void OnIsSettingsOpenChanged(bool value) => RaisePageFlags();
+    partial void OnIsAboutOpenChanged(bool value)     => RaisePageFlags();
+
+    private async Task CheckSelfUpdateAndStartAsync()
+    {
+        var latest = await _selfUpdateService.GetLatestAsync();
+
+        if (latest != null)
+        {
+            var current = _selfUpdateService.GetCurrentVersion();
+            if (_selfUpdateService.IsNewerVersion(latest.Version, current))
+            {
+                _pendingSelfUpdate = latest;
+                UpdateSelfUpdateMessage();
+                IsSelfUpdateOpen = true;
+                return;
+            }
+        }
+        await AutoStartBypassIfNeededAsync();
+    }
+
+    private void UpdateSelfUpdateMessage()
+    {
+        if (_pendingSelfUpdate == null) return;
+        var current = _selfUpdateService.GetCurrentVersion();
+        SelfUpdateMessage = string.Format(Loc["SelfUpdateAvailableFmt"], _pendingSelfUpdate.Version, current);
+    }
 
     public MainViewModel()
     {
@@ -107,10 +134,24 @@ public partial class MainViewModel : ObservableObject
         RefreshServiceStatusText();
 
         _serviceViewModel = new ServiceViewModel(ZapretFolderPath, () => SelectedPreset);
-
+        _serviceViewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ServiceViewModel.IsOpen))
+                RaisePageFlags();
+        };
         LoadPresets();
+
+        _suppressStartWithWindows = true;
+        StartWithWindows = AutoStartService.IsEnabled();
+        _suppressStartWithWindows = false;
+
+        _suppressAutoStartBypass = true;
+        AutoStartBypass = _config.AutoStartBypass;
+        _suppressAutoStartBypass = false;
+
         _ = CheckAutoUpdatesAsync();
         _ = RefreshRuntimeStateAsync();
+        _ = CheckSelfUpdateAndStartAsync();
     }
 
     private void OnLocalizationChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -121,6 +162,7 @@ public partial class MainViewModel : ObservableObject
         RefreshLocalizedOptions();
         RefreshServiceStatusText();
         RefreshUpdateStatusText();
+        UpdateSelfUpdateMessage();
         OnPropertyChanged(nameof(SelectedPresetText));
     }
 
@@ -236,6 +278,68 @@ public partial class MainViewModel : ObservableObject
             _configService.SaveConfig(_config);
         }
         OnPropertyChanged(nameof(SelectedPresetText));
+        if (value != null && IsServiceRunning)
+        {
+            _ = SwapPresetAsync(value);
+        }
+    }
+
+    private bool _isSwappingPreset;
+
+    private async Task SwapPresetAsync(ZapretPreset preset)
+    {
+        if (_isSwappingPreset) return;
+        _isSwappingPreset = true;
+
+        try
+        {
+            ServiceStatusText = string.Format(Loc["StatusSwitching"], preset.Name);
+            _zapretManager.StopZapret();
+            await Task.Delay(500);
+            if (_zapretManager.StartZapret(preset.FilePath))
+            {
+                ServiceStatusText = Loc["StatusRunning"];
+            }
+            else
+            {
+                IsServiceRunning = false;
+                ServiceStatusText = Loc["StatusError"];
+            }
+        }
+        catch
+        {
+            IsServiceRunning = false;
+            ServiceStatusText = Loc["StatusError"];
+        }
+        finally
+        {
+            _isSwappingPreset = false;
+        }
+    }
+
+    private async Task AutoStartBypassIfNeededAsync()
+    {
+        if (!AutoStartBypass) return;
+        if (SelectedPreset == null) return;
+        if (IsServiceRunning) return;
+
+        await Task.Delay(1500);
+
+        if (SelectedPreset == null || IsServiceRunning) return;
+
+        try
+        {
+            if (_zapretManager.StartZapret(SelectedPreset.FilePath))
+            {
+                IsServiceRunning = true;
+                ServiceStatusText = Loc["StatusRunning"];
+            }
+        }
+        catch
+        {
+            IsServiceRunning = false;
+            RefreshServiceStatusText();
+        }
     }
 
     [RelayCommand]
@@ -267,6 +371,34 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private void CloseTestModal() => IsTestModalOpen = false;
+
+    [RelayCommand]
+    private async Task DismissSelfUpdateAsync()
+    {
+        IsSelfUpdateOpen = false;
+        _pendingSelfUpdate = null;
+        await AutoStartBypassIfNeededAsync();
+    }
+
+    [RelayCommand]
+    private async Task ApplySelfUpdateAsync()
+    {
+        if (_pendingSelfUpdate == null) return;
+
+        IsSelfUpdateDownloading = true;
+        SelfUpdateMessage = Loc["SelfUpdateDownloading"];
+
+        var ok = await _selfUpdateService.PrepareUpdateAsync(_pendingSelfUpdate.DownloadUrl);
+
+        if (!ok)
+        {
+            IsSelfUpdateDownloading = false;
+            SelfUpdateMessage = Loc["SelfUpdateFailed"];
+            return;
+        }
+        ShutdownForExit();
+        RequestExit?.Invoke();
+    }
 
     private async Task<(bool wasServiceInstalled, bool wasBypassRunning)> SuppressZapretForTestAsync()
     {
@@ -464,6 +596,25 @@ public partial class MainViewModel : ObservableObject
         _configService.SaveConfig(_config);
     }
 
+    partial void OnStartWithWindowsChanged(bool value)
+    {
+        if (_suppressStartWithWindows) return;
+
+        if (value) AutoStartService.Enable();
+        else       AutoStartService.Disable();
+
+        _config.StartWithWindows = value;
+        _configService.SaveConfig(_config);
+    }
+
+    partial void OnAutoStartBypassChanged(bool value)
+    {
+        if (_suppressAutoStartBypass) return;
+
+        _config.AutoStartBypass = value;
+        _configService.SaveConfig(_config);
+    }
+
     private void ApplyTheme(int idx)
     {
         if (Application.Current == null) return;
@@ -621,6 +772,7 @@ public partial class MainViewModel : ObservableObject
     {
         IsSettingsOpen = true;
         ServiceViewModel.IsOpen = false;
+        IsAboutOpen = false;
         SettingsStatusText = string.Empty;
         _ = RefreshRuntimeStateAsync();
     }
@@ -633,10 +785,84 @@ public partial class MainViewModel : ObservableObject
     {
         ServiceViewModel.IsOpen = true;
         IsSettingsOpen = false;
+        IsAboutOpen = false;
     }
 
     [RelayCommand]
-    private void CloseServiceView() => ServiceViewModel.IsOpen = false;
+    private void ShowBypassPage()
+    {
+        IsSettingsOpen = false;
+        ServiceViewModel.IsOpen = false;
+        IsAboutOpen = false;
+    }
+
+    [RelayCommand]
+    private void OpenAbout()
+    {
+        IsSettingsOpen = false;
+        ServiceViewModel.IsOpen = false;
+        IsAboutOpen = true;
+        _ = RefreshSelfUpdateStatusAsync();
+    }
+
+    [RelayCommand]
+    private void OpenGitHub()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://github.com/qrw512/zapret-control",
+                UseShellExecute = true
+            });
+        }
+        catch { }
+    }
+
+    [RelayCommand]
+    private async Task CheckSelfUpdateAsync()
+    {
+        if (IsUpdating) return;
+
+        IsUpdating = true;
+        SelfUpdateStatusText = Loc["CheckUpdates"];
+
+        var latest = await _selfUpdateService.GetLatestAsync();
+        if (latest == null)
+        {
+            IsUpdating = false;
+            SelfUpdateStatusText = Loc["UpdateCheckFailed"];
+            return;
+        }
+
+        var current = _selfUpdateService.GetCurrentVersion();
+        if (_selfUpdateService.IsNewerVersion(latest.Version, current))
+        {
+            _pendingSelfUpdate = latest;
+            UpdateSelfUpdateMessage();
+            IsSelfUpdateOpen = true;
+            SelfUpdateStatusText = string.Format(Loc["UpdateAvailable"], latest.Version);
+        }
+        else
+        {
+            SelfUpdateStatusText = Loc["UpToDateMsg"];
+        }
+
+        IsUpdating = false;
+    }
+
+    private async Task RefreshSelfUpdateStatusAsync()
+    {
+        var latest = await _selfUpdateService.GetLatestAsync();
+        if (latest == null) return;
+
+        var current = _selfUpdateService.GetCurrentVersion();
+        SelfUpdateStatusText = _selfUpdateService.IsNewerVersion(latest.Version, current)
+            ? string.Format(Loc["UpdateAvailable"], latest.Version)
+            : Loc["UpToDateMsg"];
+    }
+
+    [RelayCommand] private void CloseServiceView() => ServiceViewModel.IsOpen = false;
 
     [RelayCommand]
     private async Task CheckAndInstallUpdatesAsync()

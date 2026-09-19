@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.Input;
 using ZapretGui.Services;
 using ZapretGui.ViewModels;
 using ZapretGui.Views;
+using Avalonia.Threading;
 
 namespace ZapretGui;
 
@@ -51,8 +52,10 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            var isAutoStart = Environment.GetCommandLineArgs()
+                .Any(a => a.Equals("--autostart", StringComparison.OrdinalIgnoreCase));
 
-            var mw = new MainWindow();
+            var mw = new MainWindow(startHidden: isAutoStart);
             _main = mw.DataContext as MainViewModel;
             desktop.MainWindow = mw;
 
@@ -60,10 +63,16 @@ public partial class App : Application
             {
                 _main.PropertyChanged += OnMainPropertyChanged;
                 _main.Presets.CollectionChanged += (_, _) => RebuildPresetsMenu();
+                _main.RequestExit = ExitApplication;
             }
 
             LocalizationService.Instance.PropertyChanged += OnLocalizationChanged;
             desktop.Exit += (_, _) => ShutdownZapret();
+
+            SingleInstanceService.StartListening(() =>
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(ShowWindow);
+            });
 
             BuildTrayMenu();
         }
@@ -71,10 +80,10 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-
     private void ShutdownZapret()
     {
         try { _main?.ShutdownForExit(); } catch { }
+
         try
         {
             foreach (var p in Process.GetProcessesByName("winws"))
@@ -84,6 +93,7 @@ public partial class App : Application
         }
         catch { }
     }
+
     private void BuildTrayMenu()
     {
         var tray = TrayIcon.GetIcons(this)?.FirstOrDefault();

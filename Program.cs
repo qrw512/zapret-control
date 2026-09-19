@@ -21,8 +21,21 @@ class Program
             if (TryRelaunchElevated())
                 return;
         }
+        
+        if (!SingleInstanceService.TryAcquire())
+        {
+            SingleInstanceService.SendShowSignal();
+            return;
+        }
 
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        try
+        {
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        finally
+        {
+            SingleInstanceService.Stop();
+        }
     }
 
     public static AppBuilder BuildAvaloniaApp()

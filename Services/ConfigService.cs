@@ -11,6 +11,8 @@ public class AppConfig
     public string Theme { get; set; } = "System";
     public string Language { get; set; } = "RU";
     public string LastSelectedPreset { get; set; } = string.Empty;
+    public bool StartWithWindows { get; set; } = false;
+    public bool AutoStartBypass { get; set; } = false;
 }
 
 public class ConfigService

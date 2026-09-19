@@ -15,6 +15,7 @@
         Icon="/Assets/app-256.ico">
     <Grid>
         <Grid RowDefinitions="36, *">
+            <!-- TitleBar -->
             <Grid Grid.Row="0"
                   Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"
                   ColumnDefinitions="Auto, *, Auto, Auto"
@@ -68,8 +69,89 @@
                 </Button>
             </Grid>
 
-            <Grid Grid.Row="1" ColumnDefinitions="320, *">
+            <Grid Grid.Row="1" ColumnDefinitions="56, Auto, *">
+
+                <!-- ==== Nav rail ==== -->
                 <Border Grid.Column="0"
+                        Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"
+                        BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
+                        BorderThickness="0,1,1,0">
+                    <Border.Styles>
+                        <Style Selector="Button.nav">
+                            <Setter Property="Width" Value="40"/>
+                            <Setter Property="Height" Value="40"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="CornerRadius" Value="10"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        </Style>
+                        <Style Selector="Button.nav:pointerover">
+                            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+                        </Style>
+                        <Style Selector="Button.nav.active">
+                            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+                        </Style>
+                    </Border.Styles>
+
+                    <Grid RowDefinitions="Auto, *, Auto">
+
+                        <!-- Верхние иконки -->
+                        <StackPanel Grid.Row="0" Margin="0,10" Spacing="4" HorizontalAlignment="Center">
+
+                            <!-- Bypass -->
+                            <Button Classes="nav"
+                                    Classes.active="{Binding IsBypassPage}"
+                                    Command="{Binding ShowBypassPageCommand}"
+                                    ToolTip.Tip="{Binding Loc[BypassModes]}">
+                                <Viewbox Width="20" Height="20" Stretch="Uniform">
+                                    <Path Data="{StaticResource IconShield}"
+                                        Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                </Viewbox>
+                            </Button>
+
+                            <!-- Tools -->
+                            <Button Classes="nav"
+                                    Classes.active="{Binding IsToolsPage}"
+                                    Command="{Binding OpenServiceViewCommand}"
+                                    ToolTip.Tip="{Binding Loc[BtnTools]}">
+                                <Viewbox Width="20" Height="20" Stretch="Uniform">
+                                    <Path Data="{StaticResource IconTools}"
+                                        Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                </Viewbox>
+                            </Button>
+
+                            <!-- Settings -->
+                            <Button Classes="nav"
+                                    Classes.active="{Binding IsSettingsPage}"
+                                    Command="{Binding OpenSettingsCommand}"
+                                    ToolTip.Tip="{Binding Loc[SettingsTitle]}">
+                                <Viewbox Width="20" Height="20" Stretch="Uniform">
+                                    <Path Data="{StaticResource IconSettings}"
+                                        Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                </Viewbox>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- About (внизу) -->
+                        <StackPanel Grid.Row="2" Margin="0,10" Spacing="4" HorizontalAlignment="Center">
+                            <Button Classes="nav"
+                                    Classes.active="{Binding IsAboutPage}"
+                                    Command="{Binding OpenAboutCommand}"
+                                    ToolTip.Tip="{Binding Loc[About]}">
+                                <Viewbox Width="20" Height="20" Stretch="Uniform">
+                                    <Path Data="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"
+                                        Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                </Viewbox>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- ==== Presets panel (только на странице обходов) ==== -->
+                <Border Grid.Column="1"
+                        Width="320"
+                        IsVisible="{Binding IsBypassPage}"
                         Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"
                         BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
                         BorderThickness="0,1,1,0">
@@ -100,16 +182,16 @@
                                     <MenuFlyout>
                                         <MenuItem Header="{Binding Loc[MenuTestCurrent]}">
                                             <MenuItem Header="{Binding Loc[TestStandard]}"
-                                                    Command="{Binding TestCurrentStandardCommand}"/>
+                                                      Command="{Binding TestCurrentStandardCommand}"/>
                                             <MenuItem Header="{Binding Loc[TestDpi]}"
-                                                    Command="{Binding TestCurrentDpiCommand}"/>
+                                                      Command="{Binding TestCurrentDpiCommand}"/>
                                         </MenuItem>
                                         <Separator/>
                                         <MenuItem Header="{Binding Loc[MenuTestAll]}"
-                                                Command="{Binding TestAllModesCommand}"/>
+                                                  Command="{Binding TestAllModesCommand}"/>
                                         <Separator/>
                                         <MenuItem Header="{Binding Loc[MenuShowLastResult]}"
-                                                Command="{Binding ShowLastResultCommand}"/>
+                                                  Command="{Binding ShowLastResultCommand}"/>
                                     </MenuFlyout>
                                 </Button.Flyout>
                             </Button>
@@ -150,15 +232,12 @@
                         </ScrollViewer>
                     </Grid>
                 </Border>
-                <Grid Grid.Column="1">
-                    <Grid RowDefinitions="Auto, *, Auto" Margin="24">
-                        <Grid.IsVisible>
-                            <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                <Binding Path="!IsSettingsOpen"/>
-                                <Binding Path="!ServiceViewModel.IsOpen"/>
-                            </MultiBinding>
-                        </Grid.IsVisible>
 
+                <!-- ==== Content ==== -->
+                <Grid Grid.Column="2">
+
+                    <!-- Bypass page -->
+                    <Grid IsVisible="{Binding IsBypassPage}" RowDefinitions="Auto, *, Auto" Margin="24">
                         <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
                             <StackPanel VerticalAlignment="Center" Spacing="2">
                                 <TextBlock Text="Zapret Control" FontSize="22" FontWeight="Bold"/>
@@ -166,31 +245,8 @@
                                            FontSize="12"
                                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
                             </StackPanel>
-
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                <Button Command="{Binding OpenServiceViewCommand}"
-                                        CornerRadius="8" Padding="12,8">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <Path Data="{StaticResource IconTools}"
-                                              Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
-                                              Width="14" Height="14" Stretch="Uniform"
-                                              VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding Loc[BtnTools]}" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
-
-                                <Button Command="{Binding OpenSettingsCommand}"
-                                        CornerRadius="8" Padding="12,8">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <Path Data="{StaticResource IconSettings}"
-                                              Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
-                                              Width="14" Height="14" Stretch="Uniform"
-                                              VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding Loc[SettingsTitle]}" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
                         </Grid>
+
                         <Border Grid.Row="1"
                                 Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                                 CornerRadius="16" Padding="28" Margin="0,20"
@@ -200,10 +256,10 @@
                             <StackPanel Spacing="20" HorizontalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <ToggleSwitch Classes="large" IsChecked="{Binding IsServiceRunning}"
-                                                Command="{Binding ToggleServiceCommand}"
-                                                OnContent="" OffContent=""
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"/>
+                                                  Command="{Binding ToggleServiceCommand}"
+                                                  OnContent="" OffContent=""
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
                                 </StackPanel>
                                 <StackPanel Spacing="6" HorizontalAlignment="Center">
                                     <TextBlock Text="{Binding ServiceStatusText}"
@@ -227,7 +283,7 @@
                                                 CornerRadius="8" Padding="12,6"
                                                 FontSize="12"/>
                                     </StackPanel>
-                                    
+
                                     <ProgressBar IsIndeterminate="True"
                                                  Width="120" Height="4"
                                                  HorizontalAlignment="Center"
@@ -235,6 +291,7 @@
                                 </StackPanel>
                             </StackPanel>
                         </Border>
+
                         <Border Grid.Row="2"
                                 Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                                 CornerRadius="12" Padding="14,10"
@@ -261,12 +318,18 @@
                             </Grid>
                         </Border>
                     </Grid>
-                    <views:SettingsView IsVisible="{Binding IsSettingsOpen}"/>
-                    <views:ServiceView DataContext="{Binding ServiceViewModel}"
-                                       IsVisible="{Binding IsOpen}"/>
+
+                    <views:SettingsView IsVisible="{Binding IsSettingsPage}"/>
+
+                    <Panel IsVisible="{Binding IsToolsPage}">
+                        <views:ServiceView DataContext="{Binding ServiceViewModel}"/>
+                    </Panel>
+
+                    <views:AboutView IsVisible="{Binding IsAboutPage}"/>
                 </Grid>
             </Grid>
         </Grid>
+
         <Border Background="#80000000"
                 IsVisible="{Binding IsTestModalOpen}"
                 ZIndex="100">
@@ -308,6 +371,40 @@
                             HorizontalAlignment="Right"
                             CornerRadius="8" Padding="16,8"/>
                 </Grid>
+            </Border>
+        </Border>
+
+        <Border Background="#80000000"
+                IsVisible="{Binding IsSelfUpdateOpen}"
+                ZIndex="200">
+            <Border Width="480"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="16"
+                    BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
+                    BorderThickness="1"
+                    Padding="24"
+                    BoxShadow="0 8 32 0 #60000000">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="{Binding Loc[SelfUpdateTitle]}"
+                               FontSize="16" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding SelfUpdateMessage}"
+                               FontSize="13"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                HorizontalAlignment="Right" Margin="0,8,0,0">
+                        <Button Content="{Binding Loc[SelfUpdateNo]}"
+                                Command="{Binding DismissSelfUpdateCommand}"
+                                IsEnabled="{Binding IsSelfUpdateReady}"
+                                CornerRadius="8" Padding="16,8"/>
+                        <Button Content="{Binding Loc[SelfUpdateYes]}"
+                                Command="{Binding ApplySelfUpdateCommand}"
+                                IsEnabled="{Binding IsSelfUpdateReady}"
+                                Classes="accent"
+                                CornerRadius="8" Padding="16,8"/>
+                    </StackPanel>
+                </StackPanel>
             </Border>
         </Border>
     </Grid>

@@ -60,7 +60,6 @@ public partial class ServiceViewModel : ObservableObject
         Tasks = new ObservableCollection<ServiceTaskItem>
         {
             new() { Icon = "🔍", CommandLabel = "diagnostics"   },
-            new() { Icon = "📊", CommandLabel = "status"        },
             new() { Icon = "🌐", CommandLabel = "ipset_update"  },
             new() { Icon = "📝", CommandLabel = "hosts_check"   },
             new() { Icon = "🔄", CommandLabel = "replace_fakes" }

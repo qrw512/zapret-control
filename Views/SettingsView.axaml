@@ -13,8 +13,10 @@
             <TextBlock Grid.Column="1" Text="{Binding Loc[SettingsTitle]}"
                        FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
         </Grid>
+
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,20,0,0">
             <StackPanel Spacing="12">
+
                 <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                         CornerRadius="12" Padding="16,12"
                         BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
@@ -29,20 +31,37 @@
                         </Grid>
                     </StackPanel>
                 </Border>
+
                 <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                         CornerRadius="12" Padding="16,12"
                         BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,12,0">
-                            <TextBlock Text="{Binding Loc[AutoStart]}" FontWeight="SemiBold" FontSize="13"/>
-                            <TextBlock Text="{Binding Loc[AutoStartDesc]}"
+                            <TextBlock Text="{Binding Loc[StartWithWindows]}" FontWeight="SemiBold" FontSize="13"/>
+                            <TextBlock Text="{Binding Loc[StartWithWindowsDesc]}"
                                        FontSize="11" TextWrapping="Wrap"
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
                         </StackPanel>
                         <ToggleSwitch Grid.Column="1" VerticalAlignment="Center"
-                                      IsChecked="{Binding IsServiceInstalled, Mode=TwoWay}"/>
+                                      IsChecked="{Binding StartWithWindows, Mode=TwoWay}"/>
                     </Grid>
                 </Border>
+
+                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                        CornerRadius="12" Padding="16,12"
+                        BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,12,0">
+                            <TextBlock Text="{Binding Loc[AutoStartBypass]}" FontWeight="SemiBold" FontSize="13"/>
+                            <TextBlock Text="{Binding Loc[AutoStartBypassDesc]}"
+                                       FontSize="11" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" VerticalAlignment="Center"
+                                      IsChecked="{Binding AutoStartBypass, Mode=TwoWay}"/>
+                    </Grid>
+                </Border>
+
                 <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                         CornerRadius="12" Padding="16,12"
                         BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
@@ -58,6 +77,7 @@
                                   SelectedIndex="{Binding GameFilterModeIndex, Mode=TwoWay}"/>
                     </Grid>
                 </Border>
+
                 <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                         CornerRadius="12" Padding="16,12"
                         BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
@@ -68,6 +88,7 @@
                                   SelectedIndex="{Binding ThemeIndex, Mode=TwoWay}"/>
                     </Grid>
                 </Border>
+
                 <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                         CornerRadius="12" Padding="16,12"
                         BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
@@ -79,6 +100,7 @@
                         </ComboBox>
                     </Grid>
                 </Border>
+
                 <TextBlock Text="{Binding SettingsStatusText}"
                            FontSize="11"
                            TextWrapping="Wrap"
