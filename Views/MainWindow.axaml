@@ -1,0 +1,314 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ZapretGui.ViewModels"
+        xmlns:views="using:ZapretGui.Views"
+        xmlns:models="using:ZapretGui.Models"
+        xmlns:styling="using:Avalonia.Styling"
+        x:Class="ZapretGui.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Zapret Control" Width="1024" Height="600"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        WindowDecorations="BorderOnly"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Assets/app-256.ico">
+    <Grid>
+        <Grid RowDefinitions="36, *">
+            <Grid Grid.Row="0"
+                  Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"
+                  ColumnDefinitions="Auto, *, Auto, Auto"
+                  PointerPressed="TitleBar_PointerPressed">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="14,0" Spacing="8" VerticalAlignment="Center">
+                    <Image Source="/Assets/app-white.png"
+                           Width="18" Height="18"
+                           Stretch="Uniform"
+                           VerticalAlignment="Center"
+                           RenderOptions.BitmapInterpolationMode="HighQuality"
+                           IsVisible="{Binding $parent[Window].ActualThemeVariant,
+                                       Converter={x:Static ObjectConverters.Equal},
+                                       ConverterParameter={x:Static styling:ThemeVariant.Light}}"/>
+
+                    <Image Source="/Assets/app-dark.png"
+                           Width="18" Height="18"
+                           Stretch="Uniform"
+                           VerticalAlignment="Center"
+                           RenderOptions.BitmapInterpolationMode="HighQuality"
+                           IsVisible="{Binding $parent[Window].ActualThemeVariant,
+                                       Converter={x:Static ObjectConverters.Equal},
+                                       ConverterParameter={x:Static styling:ThemeVariant.Dark}}"/>
+
+                    <TextBlock Text="Zapret Control" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Rectangle Grid.Column="1" Fill="Transparent"/>
+
+                <Button Grid.Column="2" Click="MinimizeButton_Click"
+                        Width="46" Height="36" Background="Transparent" CornerRadius="0" Padding="0"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                    <Path Data="{StaticResource IconMinimize}"
+                          Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                          Width="12" Height="12" Stretch="Uniform"/>
+                </Button>
+
+                <Button Grid.Column="3" Click="CloseButton_Click"
+                        Width="46" Height="36" Background="Transparent" CornerRadius="0" Padding="0"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover">
+                            <Setter Property="Background" Value="#E81123"/>
+                        </Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="TextElement.Foreground" Value="White"/>
+                        </Style>
+                    </Button.Styles>
+                    <Path Data="{StaticResource IconClose}"
+                          Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                          Width="12" Height="12" Stretch="Uniform"/>
+                </Button>
+            </Grid>
+
+            <Grid Grid.Row="1" ColumnDefinitions="320, *">
+                <Border Grid.Column="0"
+                        Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"
+                        BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
+                        BorderThickness="0,1,1,0">
+                    <Grid RowDefinitions="Auto, *">
+                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="20,16,12,12">
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding Loc[BypassModes]}"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       VerticalAlignment="Center"/>
+
+                            <Button Grid.Column="1"
+                                    Width="32" Height="32" Padding="0"
+                                    CornerRadius="8"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    IsEnabled="{Binding !IsAnyTestRunning}"
+                                    ToolTip.Tip="{Binding Loc[PresetMenuTooltip]}">
+                                <Viewbox Width="14" Height="14" Stretch="Uniform"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Vertical" Width="4" Height="16">
+                                        <Ellipse Width="4" Height="4" Fill="{DynamicResource SystemControlForegroundBaseHighBrush}" Margin="0,0,0,2"/>
+                                        <Ellipse Width="4" Height="4" Fill="{DynamicResource SystemControlForegroundBaseHighBrush}" Margin="0,0,0,2"/>
+                                        <Ellipse Width="4" Height="4" Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                    </StackPanel>
+                                </Viewbox>
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <MenuItem Header="{Binding Loc[MenuTestCurrent]}">
+                                            <MenuItem Header="{Binding Loc[TestStandard]}"
+                                                    Command="{Binding TestCurrentStandardCommand}"/>
+                                            <MenuItem Header="{Binding Loc[TestDpi]}"
+                                                    Command="{Binding TestCurrentDpiCommand}"/>
+                                        </MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="{Binding Loc[MenuTestAll]}"
+                                                Command="{Binding TestAllModesCommand}"/>
+                                        <Separator/>
+                                        <MenuItem Header="{Binding Loc[MenuShowLastResult]}"
+                                                Command="{Binding ShowLastResultCommand}"/>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+                        </Grid>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="Transparent">
+                            <ListBox ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset}"
+                                     Margin="12,0,12,12" Background="Transparent" BorderThickness="0" Padding="0">
+                                <ListBox.Styles>
+                                    <Style Selector="ListBoxItem">
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Margin" Value="0,0,0,8"/>
+                                        <Setter Property="CornerRadius" Value="12"/>
+                                    </Style>
+                                </ListBox.Styles>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:ZapretPreset">
+                                        <Border CornerRadius="12" Padding="16,13"
+                                                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                                BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
+                                                BorderThickness="1">
+                                            <Grid ColumnDefinitions="*, Auto">
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="3">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14"/>
+                                                    <TextBlock Text="Preset / BAT" FontSize="11"
+                                                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                                                </StackPanel>
+                                                <Path Grid.Column="1"
+                                                      Data="{StaticResource IconChevronRight}"
+                                                      Fill="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                                      Width="12" Height="12" Stretch="Uniform"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+                <Grid Grid.Column="1">
+                    <Grid RowDefinitions="Auto, *, Auto" Margin="24">
+                        <Grid.IsVisible>
+                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                <Binding Path="!IsSettingsOpen"/>
+                                <Binding Path="!ServiceViewModel.IsOpen"/>
+                            </MultiBinding>
+                        </Grid.IsVisible>
+
+                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                            <StackPanel VerticalAlignment="Center" Spacing="2">
+                                <TextBlock Text="Zapret Control" FontSize="22" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding Loc[MainSubtitle]}"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <Button Command="{Binding OpenServiceViewCommand}"
+                                        CornerRadius="8" Padding="12,8">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Path Data="{StaticResource IconTools}"
+                                              Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                                              Width="14" Height="14" Stretch="Uniform"
+                                              VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Loc[BtnTools]}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Command="{Binding OpenSettingsCommand}"
+                                        CornerRadius="8" Padding="12,8">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Path Data="{StaticResource IconSettings}"
+                                              Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                                              Width="14" Height="14" Stretch="Uniform"
+                                              VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Loc[SettingsTitle]}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                        <Border Grid.Row="1"
+                                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                CornerRadius="16" Padding="28" Margin="0,20"
+                                VerticalAlignment="Center"
+                                BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
+                                BorderThickness="1">
+                            <StackPanel Spacing="20" HorizontalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <ToggleSwitch Classes="large" IsChecked="{Binding IsServiceRunning}"
+                                                Command="{Binding ToggleServiceCommand}"
+                                                OnContent="" OffContent=""
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding ServiceStatusText}"
+                                               FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding SelectedPresetText}"
+                                               FontSize="13"
+                                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                                HorizontalAlignment="Center"
+                                                IsEnabled="{Binding !IsAnyTestRunning}">
+                                        <Button Content="{Binding Loc[BtnTestStandard]}"
+                                                Command="{Binding TestCurrentStandardCommand}"
+                                                CornerRadius="8" Padding="12,6"
+                                                FontSize="12"/>
+                                        <Button Content="{Binding Loc[BtnTestDpi]}"
+                                                Command="{Binding TestCurrentDpiCommand}"
+                                                CornerRadius="8" Padding="12,6"
+                                                FontSize="12"/>
+                                    </StackPanel>
+                                    
+                                    <ProgressBar IsIndeterminate="True"
+                                                 Width="120" Height="4"
+                                                 HorizontalAlignment="Center"
+                                                 IsVisible="{Binding IsAnyTestRunning}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Row="2"
+                                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                CornerRadius="12" Padding="14,10"
+                                BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
+                                BorderThickness="1">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <TextBlock Text="{Binding UpdateStatusText}"
+                                           VerticalAlignment="Center" FontSize="12"
+                                           IsVisible="{Binding !IsUpdateAvailable}"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+
+                                <TextBlock Text="{Binding UpdateStatusText}"
+                                           VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"
+                                           IsVisible="{Binding IsUpdateAvailable}"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+
+                                <Button Grid.Column="1"
+                                        Classes="accent"
+                                        Content="{Binding Loc[Update]}"
+                                        Command="{Binding CheckAndInstallUpdatesCommand}"
+                                        IsVisible="{Binding IsUpdateAvailable}"
+                                        IsEnabled="{Binding !IsUpdating}"
+                                        CornerRadius="6" Padding="14,6"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                    <views:SettingsView IsVisible="{Binding IsSettingsOpen}"/>
+                    <views:ServiceView DataContext="{Binding ServiceViewModel}"
+                                       IsVisible="{Binding IsOpen}"/>
+                </Grid>
+            </Grid>
+        </Grid>
+        <Border Background="#80000000"
+                IsVisible="{Binding IsTestModalOpen}"
+                ZIndex="100">
+            <Border Width="720" MaxHeight="520"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="16"
+                    BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
+                    BorderThickness="1"
+                    Padding="20"
+                    BoxShadow="0 8 32 0 #60000000">
+                <Grid RowDefinitions="Auto, Auto, *, Auto">
+                    <TextBlock Grid.Row="0"
+                               Text="{Binding TestModalTitle}"
+                               FontSize="16" FontWeight="Bold"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding TestModalSubtitle}"
+                               FontSize="12"
+                               Margin="0,4,0,12"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+
+                    <Border Grid.Row="2"
+                            Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                            CornerRadius="8" Padding="12" Margin="0,0,0,12">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <SelectableTextBlock Text="{Binding TestModalBody}"
+                                                 FontFamily="Consolas, Cascadia Code, Courier New"
+                                                 FontSize="11"
+                                                 TextWrapping="Wrap"
+                                                 Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                        </ScrollViewer>
+                    </Border>
+
+                    <Button Grid.Row="3"
+                            Content="{Binding Loc[BtnClose]}"
+                            Command="{Binding CloseTestModalCommand}"
+                            Classes="accent"
+                            HorizontalAlignment="Right"
+                            CornerRadius="8" Padding="16,8"/>
+                </Grid>
+            </Border>
+        </Border>
+    </Grid>
+</Window>

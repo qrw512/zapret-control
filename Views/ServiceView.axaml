@@ -1,0 +1,228 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ZapretGui.ViewModels"
+             xmlns:models="using:ZapretGui.Models"
+             x:Class="ZapretGui.Views.ServiceView"
+             x:DataType="vm:ServiceViewModel">
+
+    <Grid>
+        <Grid RowDefinitions="Auto, *" Margin="24">
+            <Grid Grid.Row="0" ColumnDefinitions="Auto, *" Margin="0,0,0,20">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                    <Button Click="Back_Click"
+                            CornerRadius="10" Width="40" Height="40" Padding="0"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                        <Path Data="{StaticResource IconBack}"
+                              Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                              Width="18" Height="18" Stretch="Uniform"/>
+                    </Button>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Loc[ServiceViewTitle]}" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Loc[ServiceViewSubtitle]}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Tasks}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="2" HorizontalAlignment="Stretch"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:ServiceTaskItem">
+                            <Border Margin="0,0,12,12"
+                                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                    CornerRadius="12"
+                                    BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
+                                    BorderThickness="1"
+                                    Padding="16">
+                                <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto">
+                                    <Grid Grid.Row="0" ColumnDefinitions="Auto, *">
+                                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8"
+                                                Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                                Margin="0,0,12,0">
+                                            <TextBlock Text="{Binding Icon}" FontSize="18"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Border Width="8" Height="8" CornerRadius="4"
+                                                        Background="#888888" VerticalAlignment="Center"
+                                                        IsVisible="{Binding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:TaskExecutionState.Idle}}"/>
+                                                <Border Width="8" Height="8" CornerRadius="4"
+                                                        Background="#0078D4" VerticalAlignment="Center"
+                                                        IsVisible="{Binding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:TaskExecutionState.Running}}"/>
+                                                <Border Width="8" Height="8" CornerRadius="4"
+                                                        Background="#107C10" VerticalAlignment="Center"
+                                                        IsVisible="{Binding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:TaskExecutionState.Success}}"/>
+                                                <Border Width="8" Height="8" CornerRadius="4"
+                                                        Background="#C42B1C" VerticalAlignment="Center"
+                                                        IsVisible="{Binding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:TaskExecutionState.Failed}}"/>
+
+                                                <TextBlock Text="{Binding StatusText}" FontSize="11"
+                                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Grid.Row="1" Text="{Binding Description}" FontSize="12"
+                                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                               TextWrapping="Wrap" Margin="0,12,0,16"/>
+                                    <ItemsControl Grid.Row="2" ItemsSource="{Binding SubActions}"
+                                                  IsVisible="{Binding HasSubActions}"
+                                                  Margin="0,0,0,12">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="6"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="models:ServiceSubAction">
+                                                <Button Content="{Binding Label}"
+                                                        Command="{Binding $parent[UserControl].DataContext.RunSubActionCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        CornerRadius="8" Padding="10,6" FontSize="12"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Border Grid.Row="3"
+                                            IsVisible="{Binding IsExpanded}"
+                                            Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                            CornerRadius="8" Padding="10" Margin="0,0,0,12">
+                                        <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                                            <SelectableTextBlock Text="{Binding LastOutput}"
+                                                                 FontFamily="Consolas, Cascadia Code, Courier New"
+                                                                 FontSize="11"
+                                                                 TextWrapping="Wrap"
+                                                                 Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                    <Grid Grid.Row="4" ColumnDefinitions="*, Auto">
+                                        <Button Grid.Column="0"
+                                                Command="{Binding $parent[UserControl].DataContext.RunTaskCommand}"
+                                                CommandParameter="{Binding}"
+                                                IsVisible="{Binding !HasSubActions}"
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Center"
+                                                CornerRadius="8" Padding="10,8">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <ProgressBar IsIndeterminate="True" Width="14" Height="14"
+                                                             IsVisible="{Binding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:TaskExecutionState.Running}}"/>
+                                                <TextBlock Text="{Binding $parent[UserControl].DataContext.Loc[BtnRun]}"
+                                                           FontWeight="Medium"/>
+                                            </StackPanel>
+                                        </Button>
+
+                                        <Button Grid.Column="1" Margin="8,0,0,0"
+                                                Command="{Binding $parent[UserControl].DataContext.ToggleExpandCommand}"
+                                                CommandParameter="{Binding}"
+                                                IsVisible="{Binding HasOutput}"
+                                                ToolTip.Tip="{Binding $parent[UserControl].DataContext.Loc[BtnShowOutput]}"
+                                                CornerRadius="8" Height="36" Width="36" Padding="0"
+                                                HorizontalContentAlignment="Center"
+                                                VerticalContentAlignment="Center">
+                                            <Path Data="{StaticResource IconCopy}"
+                                                  Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                                                  Width="14" Height="14" Stretch="Uniform"/>
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+        <ItemsControl ItemsSource="{Binding Notifications}"
+                      HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                      Margin="24" Width="320">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:NotificationItem">
+                    <Border Margin="0,0,0,8"
+                            Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                            CornerRadius="10"
+                            BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
+                            BorderThickness="1"
+                            Padding="12"
+                            BoxShadow="0 4 12 0 #40000000">
+                        <Grid ColumnDefinitions="4, *, Auto">
+                            <Panel Grid.Column="0" Width="4">
+                                <Border CornerRadius="2" Background="#107C10"
+                                        IsVisible="{Binding !IsError}"/>
+                                <Border CornerRadius="2" Background="#C42B1C"
+                                        IsVisible="{Binding IsError}"/>
+                            </Panel>
+
+                            <StackPanel Grid.Column="1" Margin="10,0" Spacing="3" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13"/>
+                                <TextBlock Text="{Binding Message}" FontSize="11" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="2"
+                                    Command="{Binding $parent[UserControl].DataContext.DismissNotificationCommand}"
+                                    CommandParameter="{Binding}"
+                                    Background="Transparent" Padding="0"
+                                    Width="24" Height="24"
+                                    CornerRadius="4"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    VerticalAlignment="Top">
+                                <Path Data="{StaticResource IconClose}"
+                                      Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                                      Width="10" Height="10" Stretch="Uniform"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Border Background="#80000000"
+                IsVisible="{Binding IsFakesModalOpen}"
+                ZIndex="200">
+            <Border Width="480"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="16"
+                    BorderBrush="{DynamicResource SystemControlElevationBorderBrush}"
+                    BorderThickness="1"
+                    Padding="20"
+                    BoxShadow="0 8 32 0 #60000000">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="{Binding Loc[FakesModalTitle]}"
+                               FontSize="16" FontWeight="Bold"/>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{Binding Loc[FakesTypeLabel]}"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <ComboBox ItemsSource="{Binding FakeTypes}"
+                                  SelectedIndex="{Binding SelectedFakeTypeIndex, Mode=TwoWay}"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{Binding Loc[FakesFileLabel]}"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <ComboBox ItemsSource="{Binding FakeFiles}"
+                                  SelectedIndex="{Binding SelectedFakeFileIndex, Mode=TwoWay}"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                HorizontalAlignment="Right" Margin="0,8,0,0">
+                        <Button Content="{Binding Loc[BtnCancel]}"
+                                Command="{Binding CloseFakesDialogCommand}"
+                                CornerRadius="8" Padding="16,8"/>
+                        <Button Content="{Binding Loc[BtnApply]}"
+                                Command="{Binding ApplyFakesCommand}"
+                                IsEnabled="{Binding CanApplyFakes}"
+                                Classes="accent"
+                                CornerRadius="8" Padding="16,8"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>
