@@ -66,7 +66,11 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _gameFilterOptions = new();
     [ObservableProperty] private ObservableCollection<string> _themeOptions = new();
     [ObservableProperty] private string _settingsStatusText = string.Empty;
+    [ObservableProperty] private double _selfUpdateProgress;
+    [ObservableProperty] private bool   _isSelfUpdateProgressVisible;
+
     public bool IsSelfUpdateReady => !IsSelfUpdateDownloading;
+    
     public string AppVersion => "v" + _selfUpdateService.GetCurrentVersion();
 
     partial void OnIsSelfUpdateDownloadingChanged(bool value)
@@ -386,9 +390,28 @@ public partial class MainViewModel : ObservableObject
         if (_pendingSelfUpdate == null) return;
 
         IsSelfUpdateDownloading = true;
+        IsSelfUpdateProgressVisible = true;
+        SelfUpdateProgress = 0;
         SelfUpdateMessage = Loc["SelfUpdateDownloading"];
 
-        var ok = await _selfUpdateService.PrepareUpdateAsync(_pendingSelfUpdate.DownloadUrl);
+        var ok = await _selfUpdateService.PrepareUpdateAsync(
+            _pendingSelfUpdate.DownloadUrl,
+            onProgress: (downloaded, total) =>
+            {
+                if (total <= 0) return;
+
+                var percent = downloaded * 100.0 / total;
+                var mb = downloaded / 1024.0 / 1024.0;
+                var totalMb = total / 1024.0 / 1024.0;
+
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    SelfUpdateProgress = percent;
+                    SelfUpdateMessage = $"{Loc["SelfUpdateDownloading"]}  {mb:F1} / {totalMb:F1} МБ";
+                });
+            });
+
+        IsSelfUpdateProgressVisible = false;
 
         if (!ok)
         {
@@ -396,6 +419,7 @@ public partial class MainViewModel : ObservableObject
             SelfUpdateMessage = Loc["SelfUpdateFailed"];
             return;
         }
+
         ShutdownForExit();
         RequestExit?.Invoke();
     }

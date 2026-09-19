@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Security.Principal;
 using Avalonia;
 using ZapretGui.Services;
@@ -21,7 +20,7 @@ class Program
             if (TryRelaunchElevated())
                 return;
         }
-        
+
         if (!SingleInstanceService.TryAcquire())
         {
             SingleInstanceService.SendShowSignal();
@@ -63,38 +62,21 @@ class Program
         {
             var exePath = Environment.ProcessPath;
             if (string.IsNullOrEmpty(exePath)) return false;
+            var processName = Path.GetFileNameWithoutExtension(exePath);
+            if (processName.Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+                return false;
 
             var cmdArgs = Environment.GetCommandLineArgs().Skip(1).Select(QuoteIfNeeded).ToList();
             var argString = string.Join(" ", cmdArgs);
 
-            ProcessStartInfo psi;
-            var processName = Path.GetFileNameWithoutExtension(exePath);
-
-            if (processName.Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+            var psi = new ProcessStartInfo
             {
-                var dllPath = Assembly.GetEntryAssembly()?.Location;
-                if (string.IsNullOrEmpty(dllPath)) return false;
-
-                psi = new ProcessStartInfo
-                {
-                    FileName = exePath,
-                    Arguments = $"\"{dllPath}\" {argString}".Trim(),
-                    UseShellExecute = true,
-                    Verb = "runas",
-                    WorkingDirectory = AppContext.BaseDirectory
-                };
-            }
-            else
-            {
-                psi = new ProcessStartInfo
-                {
-                    FileName = exePath,
-                    Arguments = argString,
-                    UseShellExecute = true,
-                    Verb = "runas",
-                    WorkingDirectory = AppContext.BaseDirectory
-                };
-            }
+                FileName = exePath,
+                Arguments = argString,
+                UseShellExecute = true,
+                Verb = "runas",
+                WorkingDirectory = AppContext.BaseDirectory
+            };
 
             Process.Start(psi);
             return true;

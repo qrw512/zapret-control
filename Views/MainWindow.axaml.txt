@@ -377,7 +377,7 @@
         <Border Background="#80000000"
                 IsVisible="{Binding IsSelfUpdateOpen}"
                 ZIndex="200">
-            <Border Width="520"
+            <Border Width="480"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                     CornerRadius="16"
@@ -386,22 +386,12 @@
                     Padding="24"
                     BoxShadow="0 8 32 0 #60000000">
                 <StackPanel Spacing="16">
-
                     <TextBlock Text="{Binding Loc[SelfUpdateTitle]}"
-                            FontSize="16" FontWeight="Bold"/>
-
+                               FontSize="16" FontWeight="Bold"/>
                     <TextBlock Text="{Binding SelfUpdateMessage}"
-                            FontSize="13"
-                            TextWrapping="Wrap"
-                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-
-                    <!-- Прогресс-бар: виден только во время скачивания -->
-                    <ProgressBar Minimum="0" Maximum="100"
-                                Value="{Binding SelfUpdateProgress}"
-                                Height="8"
-                                CornerRadius="4"
-                                IsVisible="{Binding IsSelfUpdateProgressVisible}"/>
-
+                               FontSize="13"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
                     <StackPanel Orientation="Horizontal" Spacing="8"
                                 HorizontalAlignment="Right" Margin="0,8,0,0">
                         <Button Content="{Binding Loc[SelfUpdateNo]}"
