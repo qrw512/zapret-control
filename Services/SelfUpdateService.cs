@@ -142,8 +142,6 @@ public class SelfUpdateService
             Log("Скачивание...");
             long totalBytes = 0;
             long downloadedBytes = 0;
-
-            // Таймаут молчания сети: если 60 секунд ни байта — прерываем
             using var idleCts = new CancellationTokenSource();
 
             using (var response = await http.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead))

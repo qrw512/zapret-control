@@ -1,112 +1,221 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Svg.Controls.Skia.Avalonia"
              xmlns:vm="using:ZapretGui.ViewModels"
              x:Class="ZapretGui.Views.SettingsView"
              x:DataType="vm:MainViewModel">
 
-    <Grid RowDefinitions="Auto, *" Margin="24">
-        <Grid Grid.Row="0" ColumnDefinitions="Auto, *">
-            <Button Grid.Column="0" Content="←" Command="{Binding CloseSettingsCommand}"
-                    CornerRadius="8" Width="36" Height="36" Padding="0"
-                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                    Margin="0,0,12,0"/>
-            <TextBlock Grid.Column="1" Text="{Binding Loc[SettingsTitle]}"
-                       FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
+    <UserControl.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Padding" Value="20"/>
+        </Style>
+
+        <Style Selector="TextBlock.card-title">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+        </Style>
+
+        <Style Selector="TextBlock.card-desc">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="LineHeight" Value="18"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+        </Style>
+
+        <Style Selector="Border.icon-box">
+            <Setter Property="Width" Value="42"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource PaletteSecondary}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto, *" Margin="28">
+
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *" Margin="0,0,0,24">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                <StackPanel VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Text="{Binding Loc[SettingsTitle]}"
+                               FontSize="26" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Loc[SettingsSubtitle]}"
+                               FontSize="13"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                </StackPanel>
+            </StackPanel>
         </Grid>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,20,0,0">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="12">
 
-                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                        CornerRadius="12" Padding="16,12"
-                        BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="{Binding Loc[PathToZapret]}" FontWeight="SemiBold" FontSize="13"/>
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBox Text="{Binding ZapretFolderPath, Mode=OneWay}" Grid.Column="0"
-                                     Margin="0,0,8,0" IsReadOnly="True" CornerRadius="6"/>
-                            <Button x:Name="BrowseButton" Grid.Column="1"
-                                    Content="{Binding Loc[Browse]}"
-                                    Click="BrowseButton_Click" CornerRadius="6"/>
+                <Border Classes="card">
+                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="16">
+                        <Border Grid.Column="0" Classes="icon-box">
+                            <svg:Svg Path="/Assets/ico/folder.svg"
+                                     Width="22" Height="22"
+                                     CurrentColor="#FFFFFFFF"
+                                     Stretch="Uniform"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6">
+                            <TextBlock Classes="card-title" Text="{Binding Loc[PathToZapret]}"/>
+                            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding ZapretFolderPath, Mode=OneWay}"
+                                         IsReadOnly="True"
+                                         FontSize="12"
+                                         CornerRadius="10"/>
+                                <Button Grid.Column="1"
+                                        x:Name="BrowseButton"
+                                        Content="{Binding Loc[Browse]}"
+                                        Click="BrowseButton_Click"
+                                        CornerRadius="10"
+                                        Padding="16,0"
+                                        VerticalAlignment="Stretch"/>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel Spacing="14">
+
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Border Classes="icon-box">
+                                <svg:Svg Path="/Assets/ico/power.svg"
+                                         Width="22" Height="22"
+                                         CurrentColor="#FFFFFFFF"
+                                         Stretch="Uniform"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center" Spacing="3">
+                                <TextBlock Classes="card-title" Text="{Binding Loc[AutoStartCardTitle]}"/>
+                                <TextBlock Classes="card-desc" Text="{Binding Loc[AutoStartCardDesc]}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Border Height="1"
+                                Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
+
+                        <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Grid.Column="0" Spacing="3" Margin="0,0,12,0">
+                                <TextBlock Classes="card-title" Text="{Binding Loc[StartWithWindows]}"/>
+                                <TextBlock Classes="card-desc" Text="{Binding Loc[StartWithWindowsDesc]}"/>
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1"
+                                          VerticalAlignment="Center"
+                                          IsChecked="{Binding StartWithWindows, Mode=TwoWay}"/>
                         </Grid>
+
+                        <Border Height="1"
+                                Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
+
+                        <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Grid.Column="0" Spacing="3" Margin="0,0,12,0">
+                                <TextBlock Classes="card-title" Text="{Binding Loc[AutoStartBypass]}"/>
+                                <TextBlock Classes="card-desc" Text="{Binding Loc[AutoStartBypassDesc]}"/>
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1"
+                                          VerticalAlignment="Center"
+                                          IsChecked="{Binding AutoStartBypass, Mode=TwoWay}"/>
+                        </Grid>
+
                     </StackPanel>
                 </Border>
 
-                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                        CornerRadius="12" Padding="16,12"
-                        BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,12,0">
-                            <TextBlock Text="{Binding Loc[StartWithWindows]}" FontWeight="SemiBold" FontSize="13"/>
-                            <TextBlock Text="{Binding Loc[StartWithWindowsDesc]}"
-                                       FontSize="11" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                        </StackPanel>
-                        <ToggleSwitch Grid.Column="1" VerticalAlignment="Center"
-                                      IsChecked="{Binding StartWithWindows, Mode=TwoWay}"/>
-                    </Grid>
-                </Border>
+                <Border Classes="card">
+                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="16">
+                        <Border Grid.Column="0" Classes="icon-box">
+                            <svg:Svg Path="/Assets/ico/gamepad.svg"
+                                     Width="22" Height="22"
+                                     CurrentColor="#FFFFFFFF"
+                                     Stretch="Uniform"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                        </Border>
 
-                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                        CornerRadius="12" Padding="16,12"
-                        BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,12,0">
-                            <TextBlock Text="{Binding Loc[AutoStartBypass]}" FontWeight="SemiBold" FontSize="13"/>
-                            <TextBlock Text="{Binding Loc[AutoStartBypassDesc]}"
-                                       FontSize="11" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                            <TextBlock Classes="card-title" Text="{Binding Loc[GameFilter]}"/>
+                            <TextBlock Classes="card-desc" Text="{Binding Loc[GameFilterDesc]}"/>
                         </StackPanel>
-                        <ToggleSwitch Grid.Column="1" VerticalAlignment="Center"
-                                      IsChecked="{Binding AutoStartBypass, Mode=TwoWay}"/>
-                    </Grid>
-                </Border>
 
-                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                        CornerRadius="12" Padding="16,12"
-                        BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,12,0">
-                            <TextBlock Text="{Binding Loc[GameFilter]}" FontWeight="SemiBold" FontSize="13"/>
-                            <TextBlock Text="{Binding Loc[GameFilterDesc]}"
-                                       FontSize="11" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                        </StackPanel>
-                        <ComboBox Grid.Column="1" Width="180" CornerRadius="6"
+                        <ComboBox Grid.Column="2"
+                                  Width="180"
+                                  CornerRadius="10"
+                                  VerticalAlignment="Center"
                                   ItemsSource="{Binding GameFilterOptions}"
                                   SelectedIndex="{Binding GameFilterModeIndex, Mode=TwoWay}"/>
                     </Grid>
                 </Border>
 
-                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                        CornerRadius="12" Padding="16,12"
-                        BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Text="{Binding Loc[Theme]}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13"/>
-                        <ComboBox Grid.Column="1" Width="160" CornerRadius="6"
+                <Border Classes="card">
+                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="16">
+                        <Border Grid.Column="0" Classes="icon-box">
+                            <svg:Svg Path="/Assets/ico/theme.svg"
+                                     Width="22" Height="22"
+                                     CurrentColor="#FFFFFFFF"
+                                     Stretch="Uniform"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                            <TextBlock Classes="card-title" Text="{Binding Loc[Theme]}"/>
+                            <TextBlock Classes="card-desc" Text="{Binding Loc[ThemeDesc]}"/>
+                        </StackPanel>
+
+                        <ComboBox Grid.Column="2"
+                                  Width="180"
+                                  CornerRadius="10"
+                                  VerticalAlignment="Center"
                                   ItemsSource="{Binding ThemeOptions}"
                                   SelectedIndex="{Binding ThemeIndex, Mode=TwoWay}"/>
                     </Grid>
                 </Border>
 
-                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                        CornerRadius="12" Padding="16,12"
-                        BorderBrush="{DynamicResource SystemControlElevationBorderBrush}" BorderThickness="1">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Text="{Binding Loc[Language]}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13"/>
-                        <ComboBox x:Name="LanguageComboBox" Grid.Column="1" Width="160" CornerRadius="6">
+                <Border Classes="card">
+                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="16">
+                        <Border Grid.Column="0" Classes="icon-box">
+                            <svg:Svg Path="/Assets/ico/globe.svg"
+                                     Width="22" Height="22"
+                                     CurrentColor="#FFFFFFFF"
+                                     Stretch="Uniform"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                            <TextBlock Classes="card-title" Text="{Binding Loc[Language]}"/>
+                            <TextBlock Classes="card-desc" Text="{Binding Loc[LanguageDesc]}"/>
+                        </StackPanel>
+
+                        <ComboBox x:Name="LanguageComboBox"
+                                  Grid.Column="2"
+                                  Width="180"
+                                  CornerRadius="10"
+                                  VerticalAlignment="Center">
                             <ComboBoxItem Content="Русский"/>
                             <ComboBoxItem Content="English"/>
                         </ComboBox>
                     </Grid>
                 </Border>
 
-                <TextBlock Text="{Binding SettingsStatusText}"
-                           FontSize="11"
-                           TextWrapping="Wrap"
-                           Margin="4,4,4,0"
-                           IsVisible="{Binding SettingsStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                        CornerRadius="12"
+                        Padding="14,10"
+                        IsVisible="{Binding SettingsStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <TextBlock Text="{Binding SettingsStatusText}"
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>

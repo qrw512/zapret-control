@@ -26,16 +26,21 @@ namespace ZapretGui.Models
         private const string IpsetUrl = "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/refs/heads/main/.service/ipset-service.txt";
         private const string HostsUrl = "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/refs/heads/main/.service/hosts";
 
+        public const string ListGeneralUser = "list-general-user.txt";
+        public const string ListExcludeUser = "list-exclude-user.txt";
+        public const string IpsetExcludeUser = "ipset-exclude-user.txt";
+
         private static LocalizationService Loc => LocalizationService.Instance;
         private static string L(string key) => Loc[key];
         private static string Lf(string key, params object[] args) => string.Format(Loc[key], args);
+
+        private string ListsDir => Path.Combine(_baseDir, "lists");
 
         public ServiceManager(string zapretFolderPath)
         {
             _baseDir = ResolveWorkingDir(zapretFolderPath);
             Log($"=== ServiceManager constructed === baseDir={_baseDir}");
         }
-
 
         private void Log(string message)
         {
@@ -179,6 +184,119 @@ namespace ZapretGui.Models
             catch { return string.Empty; }
         }
 
+        public async Task<List<string>> ReadListAsync(string fileName)
+        {
+            try
+            {
+                var path = Path.Combine(ListsDir, fileName);
+                if (!File.Exists(path)) return new List<string>();
+
+                var lines = await File.ReadAllLinesAsync(path);
+                return lines
+                    .Select(l => l.Trim())
+                    .Where(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith("#"))
+                    .ToList();
+            }
+            catch { return new List<string>(); }
+        }
+
+        public async Task<bool> AppendToListAsync(string fileName, string entry)
+        {
+            try
+            {
+                entry = entry.Trim();
+                if (string.IsNullOrWhiteSpace(entry)) return false;
+
+                Directory.CreateDirectory(ListsDir);
+                var path = Path.Combine(ListsDir, fileName);
+
+                var existing = await ReadListAsync(fileName);
+                if (existing.Any(x => x.Equals(entry, StringComparison.OrdinalIgnoreCase)))
+                    return false;
+
+                var needsNewline = File.Exists(path) &&
+                                new FileInfo(path).Length > 0 &&
+                                !(await File.ReadAllTextAsync(path)).EndsWith("\n");
+
+                var prefix = needsNewline ? Environment.NewLine : string.Empty;
+                await File.AppendAllTextAsync(path, prefix + entry + Environment.NewLine);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task WriteListAsync(string fileName, List<string> entries)
+        {
+            try
+            {
+                Directory.CreateDirectory(ListsDir);
+                var path = Path.Combine(ListsDir, fileName);
+                await File.WriteAllLinesAsync(path, entries);
+            }
+            catch { }
+        }
+
+        public async Task WriteIpExcludeAsync(string content)
+        {
+            try
+            {
+                Directory.CreateDirectory(ListsDir);
+                var path = Path.Combine(ListsDir, IpsetExcludeUser);
+                await File.WriteAllTextAsync(path, content ?? string.Empty);
+            }
+            catch { }
+        }
+
+        public async Task<string> ReadIpExcludeAsync()
+        {
+            try
+            {
+                var path = Path.Combine(ListsDir, IpsetExcludeUser);
+                if (!File.Exists(path)) return string.Empty;
+                return await File.ReadAllTextAsync(path);
+            }
+            catch { return string.Empty; }
+        }
+
+        public async Task<(bool ok, string output)> ForceUpdateHostsAsync()
+        {
+            try
+            {
+                var hostsFile = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.System),
+                    "drivers", "etc", "hosts");
+
+                if (!File.Exists(hostsFile))
+                    return (false, L("MsgHostsNotFound"));
+
+                if (!IsAdmin())
+                    return (false, L("MsgNeedAdmin"));
+
+                var remote = await Http.GetStringAsync(HostsUrl);
+                if (string.IsNullOrWhiteSpace(remote))
+                    return (false, L("MsgHostsRemoteEmpty"));
+
+                var backup = hostsFile + ".zapret_bak";
+                try { File.Copy(hostsFile, backup, overwrite: true); } catch { }
+
+                var header =
+                    "# Copyright (c) 1993-2009 Microsoft Corp.\r\n" +
+                    "#\r\n" +
+                    "# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.\r\n" +
+                    "#\r\n" +
+                    "# Managed by Zapret Control\r\n" +
+                    "#\r\n\r\n";
+
+                await File.WriteAllTextAsync(hostsFile, header + remote);
+                Log($"ForceUpdateHostsAsync: hosts updated ({remote.Length} bytes)");
+                return (true, L("MsgHostsUpdateOk"));
+            }
+            catch (Exception ex)
+            {
+                Log($"ForceUpdateHostsAsync failed: {ex.Message}");
+                return (false, Lf("MsgHostsCheckFailed", ex.Message));
+            }
+        }
 
         private async Task<(bool, string)> RunStatusAsync()
         {
@@ -213,7 +331,6 @@ namespace ZapretGui.Models
                 ? L("MsgBypassRunning")
                 : L("MsgBypassNotRunning");
         }
-
 
         private async Task<(bool, string)> RunDiagnosticsAsync()
         {

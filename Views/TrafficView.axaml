@@ -1,0 +1,289 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ZapretGui.ViewModels"
+             xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Svg.Controls.Skia.Avalonia"
+             x:Class="ZapretGui.Views.TrafficView"
+             x:DataType="vm:TrafficViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Padding" Value="22"/>
+        </Style>
+
+        <Style Selector="TextBlock.card-title">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+        </Style>
+
+        <Style Selector="TextBlock.card-desc">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+        </Style>
+
+        <Style Selector="Border.icon-box">
+            <Setter Property="Width" Value="52"/>
+            <Setter Property="Height" Value="52"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource PaletteSecondary}"/>
+        </Style>
+
+        <Style Selector="Button.state-btn">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource BtnColor}"/>
+            <Setter Property="Foreground" Value="#FFFFFFFF"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.25"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Button.state-btn.active">
+            <Setter Property="Background" Value="{DynamicResource RunnigBtnColor}"/>
+        </Style>
+
+        <Style Selector="Button.state-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Opacity" Value="0.9"/>
+        </Style>
+        <Style Selector="Button.state-btn:pressed /template/ ContentPresenter">
+            <Setter Property="Opacity" Value="0.78"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto, Auto, Auto, *" Margin="28">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,24">
+            <StackPanel VerticalAlignment="Center" Spacing="2">
+                <TextBlock Text="{Binding Loc[TrafficTitle]}" FontSize="26" FontWeight="Bold"/>
+                <TextBlock Text="{Binding Loc[TrafficSubtitle]}" FontSize="13"
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+
+                <Button Classes="state-btn"
+                        Classes.active="{Binding IsMonitoring}"
+                        Command="{Binding StartMonitoringCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <svg:Svg Path="/Assets/ico/play.svg"
+                                 Width="14" Height="14"
+                                 CurrentColor="#FFFFFFFF"
+                                 Stretch="Uniform"
+                                 VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Loc[BtnStartMonitor]}"
+                                   VerticalAlignment="Center"
+                                   Foreground="#FFFFFFFF"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Classes="state-btn"
+                        Classes.active="{Binding !IsMonitoring}"
+                        Command="{Binding StopMonitoringCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <svg:Svg Path="/Assets/ico/stop.svg"
+                                 Width="14" Height="14"
+                                 CurrentColor="#FFFFFFFF"
+                                 Stretch="Uniform"
+                                 VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Loc[BtnStopMonitor]}"
+                                   VerticalAlignment="Center"
+                                   Foreground="#FFFFFFFF"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="18" Margin="0,0,0,18">
+
+            <Border Grid.Column="0" Classes="card">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Border Grid.Column="0" Classes="icon-box" Margin="0,0,18,0">
+                        <svg:Svg Path="/Assets/ico/arrow-down.svg"
+                                 Width="26" Height="26"
+                                 CurrentColor="#FFFFFFFF"
+                                 Stretch="Uniform"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                        <TextBlock Text="{Binding Loc[TrafficDownload]}"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Text="{Binding TotalDownloadRateText}"
+                                   FontSize="24" FontWeight="Bold"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="2">
+                        <TextBlock Text="{Binding Loc[TrafficTotal]}"
+                                   FontSize="10" HorizontalAlignment="Right"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Text="{Binding TotalDownloadSumText}"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Classes="card">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Border Grid.Column="0" Classes="icon-box" Margin="0,0,18,0">
+                        <svg:Svg Path="/Assets/ico/arrow-up.svg"
+                                 Width="26" Height="26"
+                                 CurrentColor="#FFFFFFFF"
+                                 Stretch="Uniform"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                        <TextBlock Text="{Binding Loc[TrafficUpload]}"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Text="{Binding TotalUploadRateText}"
+                                   FontSize="24" FontWeight="Bold"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="2">
+                        <TextBlock Text="{Binding Loc[TrafficTotal]}"
+                                   FontSize="10" HorizontalAlignment="Right"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Text="{Binding TotalUploadSumText}"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Margin="0,0,0,18"
+                CornerRadius="12"
+                Padding="14,10"
+                Background="#3AC42B1C"
+                IsVisible="{Binding HasError}">
+            <TextBlock Text="{Binding ErrorMessage}"
+                    FontSize="12"
+                    TextWrapping="Wrap"
+                    Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+        </Border>
+
+        <Border Grid.Row="3" Classes="card" Padding="0">
+            <Grid RowDefinitions="Auto, *">
+
+                <Border Grid.Row="0"
+                        Padding="22,14"
+                        Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                        CornerRadius="18,18,0,0">
+                    <Grid ColumnDefinitions="*, 140, 140, 110, 110">
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Loc[TrafficProcess]}"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding Loc[TrafficDownload]}"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   HorizontalAlignment="Right"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Grid.Column="2"
+                                   Text="{Binding Loc[TrafficUpload]}"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   HorizontalAlignment="Right"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Grid.Column="3"
+                                   Text="Total ↓"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   HorizontalAlignment="Right"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Grid.Column="4"
+                                   Text="Total ↑"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   HorizontalAlignment="Right"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                    </Grid>
+                </Border>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Items}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TrafficItem">
+                                <Border Padding="22,10">
+                                    <Grid ColumnDefinitions="*, 140, 140, 110, 110">
+
+                                        <StackPanel Grid.Column="0"
+                                                    Orientation="Horizontal"
+                                                    Spacing="10"
+                                                    VerticalAlignment="Center">
+                                            <Border Width="8" Height="8" CornerRadius="4"
+                                                    VerticalAlignment="Center"
+                                                    Background="{DynamicResource PaletteAccent}"
+                                                    IsVisible="{Binding IsZapret}"/>
+                                            <TextBlock Text="{Binding ProcessName}"
+                                                       FontSize="13"
+                                                       VerticalAlignment="Center"/>
+                                            <Border Background="{DynamicResource PalettePrimary}"
+                                                    CornerRadius="6" Padding="8,3"
+                                                    VerticalAlignment="Center"
+                                                    IsVisible="{Binding IsZapret}">
+                                                <TextBlock Text="ZAPRET"
+                                                           FontSize="9"
+                                                           FontWeight="Bold"
+                                                           Foreground="White"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding ReceivedRateText}"
+                                                   FontSize="12"
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"/>
+
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding SentRateText}"
+                                                   FontSize="12"
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"/>
+
+                                        <TextBlock Grid.Column="3"
+                                                   Text="{Binding TotalReceivedText}"
+                                                   FontSize="11"
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+
+                                        <TextBlock Grid.Column="4"
+                                                   Text="{Binding TotalSentText}"
+                                                   FontSize="11"
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <TextBlock Grid.Row="1"
+                           Text="{Binding Loc[TrafficNoData]}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="13"
+                           IsVisible="{Binding !Items.Count}"
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

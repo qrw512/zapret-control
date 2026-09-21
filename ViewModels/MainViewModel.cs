@@ -33,7 +33,8 @@ public partial class MainViewModel : ObservableObject
     private bool _hasLastResult;
     private bool _suppressStartWithWindows;
     private bool _suppressAutoStartBypass;
-    
+    private bool _suppressBypassModeSync;
+
     private string _lastTestTitle = string.Empty;
     private string _lastTestSubtitle = string.Empty;
     private string _lastTestBody = string.Empty;
@@ -57,6 +58,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _isSelfUpdateDownloading;
     [ObservableProperty] private bool _isSettingsOpen;
     [ObservableProperty] private bool _isAboutOpen;
+    [ObservableProperty] private bool _isTrafficOpen;
     [ObservableProperty] private string _selfUpdateStatusText = string.Empty;
     [ObservableProperty] private bool _isServiceInstalled;
     [ObservableProperty] private int _gameFilterModeIndex;
@@ -68,9 +70,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _settingsStatusText = string.Empty;
     [ObservableProperty] private double _selfUpdateProgress;
     [ObservableProperty] private bool   _isSelfUpdateProgressVisible;
+    [ObservableProperty] private int _bypassModeIndex;
 
     public bool IsSelfUpdateReady => !IsSelfUpdateDownloading;
-    
+
     public string AppVersion => "v" + _selfUpdateService.GetCurrentVersion();
 
     partial void OnIsSelfUpdateDownloadingChanged(bool value)
@@ -79,11 +82,17 @@ public partial class MainViewModel : ObservableObject
 
     public string SelectedPresetText =>
         SelectedPreset == null ? string.Empty : string.Format(Loc["SelectedFormat"], SelectedPreset.Name);
-    
-    public bool IsBypassPage   => !IsSettingsOpen && !ServiceViewModel.IsOpen && !IsAboutOpen;
+
+    public string BypassModeDescription =>
+        BypassModeIndex == 1 ? Loc["BypassModeHintAll"] : Loc["BypassModeHintWhitelist"];
+
+    public bool IsBypassPage   => !IsSettingsOpen && !ServiceViewModel.IsOpen && !IsAboutOpen && !IsTrafficOpen;
     public bool IsToolsPage    => ServiceViewModel.IsOpen;
     public bool IsSettingsPage => IsSettingsOpen;
     public bool IsAboutPage    => IsAboutOpen;
+    public bool IsTrafficPage  => IsTrafficOpen;
+
+    public TrafficViewModel TrafficViewModel { get; }
 
     private void RaisePageFlags()
     {
@@ -91,10 +100,15 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(IsToolsPage));
         OnPropertyChanged(nameof(IsSettingsPage));
         OnPropertyChanged(nameof(IsAboutPage));
+        OnPropertyChanged(nameof(IsTrafficPage));
     }
 
     partial void OnIsSettingsOpenChanged(bool value) => RaisePageFlags();
     partial void OnIsAboutOpenChanged(bool value)     => RaisePageFlags();
+    partial void OnIsTrafficOpenChanged(bool value)   => RaisePageFlags();
+
+    private BypassMode GetBypassMode() =>
+        BypassModeIndex == 1 ? BypassMode.AllSites : BypassMode.Whitelist;
 
     private async Task CheckSelfUpdateAndStartAsync()
     {
@@ -143,6 +157,9 @@ public partial class MainViewModel : ObservableObject
             if (e.PropertyName == nameof(ServiceViewModel.IsOpen))
                 RaisePageFlags();
         };
+
+        TrafficViewModel = new TrafficViewModel();
+
         LoadPresets();
 
         _suppressStartWithWindows = true;
@@ -152,6 +169,10 @@ public partial class MainViewModel : ObservableObject
         _suppressAutoStartBypass = true;
         AutoStartBypass = _config.AutoStartBypass;
         _suppressAutoStartBypass = false;
+
+        _suppressBypassModeSync = true;
+        BypassModeIndex = _config.BypassModeIndex;
+        _suppressBypassModeSync = false;
 
         _ = CheckAutoUpdatesAsync();
         _ = RefreshRuntimeStateAsync();
@@ -168,6 +189,7 @@ public partial class MainViewModel : ObservableObject
         RefreshUpdateStatusText();
         UpdateSelfUpdateMessage();
         OnPropertyChanged(nameof(SelectedPresetText));
+        OnPropertyChanged(nameof(BypassModeDescription));
     }
 
     private void RefreshLocalizedOptions()
@@ -300,7 +322,7 @@ public partial class MainViewModel : ObservableObject
             ServiceStatusText = string.Format(Loc["StatusSwitching"], preset.Name);
             _zapretManager.StopZapret();
             await Task.Delay(500);
-            if (_zapretManager.StartZapret(preset.FilePath))
+            if (_zapretManager.StartZapret(preset.FilePath, GetBypassMode()))
             {
                 ServiceStatusText = Loc["StatusRunning"];
             }
@@ -333,7 +355,7 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            if (_zapretManager.StartZapret(SelectedPreset.FilePath))
+            if (_zapretManager.StartZapret(SelectedPreset.FilePath, GetBypassMode()))
             {
                 IsServiceRunning = true;
                 ServiceStatusText = Loc["StatusRunning"];
@@ -465,7 +487,7 @@ public partial class MainViewModel : ObservableObject
         }
         else if (state.wasBypassRunning)
         {
-            IsServiceRunning = _zapretManager.StartZapret(SelectedPreset.FilePath);
+            IsServiceRunning = _zapretManager.StartZapret(SelectedPreset.FilePath, GetBypassMode());
         }
         else
         {
@@ -568,7 +590,6 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-
     public async Task RefreshRuntimeStateAsync()
     {
         try
@@ -637,6 +658,18 @@ public partial class MainViewModel : ObservableObject
 
         _config.AutoStartBypass = value;
         _configService.SaveConfig(_config);
+    }
+
+    partial void OnBypassModeIndexChanged(int value)
+    {
+        OnPropertyChanged(nameof(BypassModeDescription));
+
+        if (_suppressBypassModeSync) return;
+
+        _config.BypassModeIndex = value;
+        _configService.SaveConfig(_config);
+        if (IsServiceRunning && SelectedPreset != null)
+            _ = SwapPresetAsync(SelectedPreset);
     }
 
     private void ApplyTheme(int idx)
@@ -729,6 +762,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch { }
     }
+
     private async Task CheckAutoUpdatesAsync()
     {
         var releaseInfo = await _updateService.GetLatestReleaseInfoAsync();
@@ -769,25 +803,44 @@ public partial class MainViewModel : ObservableObject
     {
         if (IsServiceRunning)
         {
+            try
+            {
+                _zapretManager.StopZapret();
+            }
+            catch { }
+
+            IsServiceRunning = false;
+            RefreshServiceStatusText();
+        }
+        else
+        {
             if (SelectedPreset == null)
             {
+                ServiceStatusText = Loc["MsgPresetNotSelected"];
                 IsServiceRunning = false;
-                RefreshServiceStatusText();
                 return;
             }
 
-            if (_zapretManager.StartZapret(SelectedPreset.FilePath))
+            bool ok;
+            try
+            {
+                ok = _zapretManager.StartZapret(SelectedPreset.FilePath, GetBypassMode());
+            }
+            catch
+            {
+                ok = false;
+            }
+
+            if (ok)
+            {
+                IsServiceRunning = true;
                 RefreshServiceStatusText();
+            }
             else
             {
                 IsServiceRunning = false;
                 ServiceStatusText = Loc["StatusError"];
             }
-        }
-        else
-        {
-            _zapretManager.StopZapret();
-            RefreshServiceStatusText();
         }
     }
 
@@ -797,6 +850,7 @@ public partial class MainViewModel : ObservableObject
         IsSettingsOpen = true;
         ServiceViewModel.IsOpen = false;
         IsAboutOpen = false;
+        IsTrafficOpen = false;
         SettingsStatusText = string.Empty;
         _ = RefreshRuntimeStateAsync();
     }
@@ -810,6 +864,8 @@ public partial class MainViewModel : ObservableObject
         ServiceViewModel.IsOpen = true;
         IsSettingsOpen = false;
         IsAboutOpen = false;
+        IsTrafficOpen = false;
+        ServiceViewModel.LoadTabData();
     }
 
     [RelayCommand]
@@ -818,7 +874,20 @@ public partial class MainViewModel : ObservableObject
         IsSettingsOpen = false;
         ServiceViewModel.IsOpen = false;
         IsAboutOpen = false;
+        IsTrafficOpen = false;
     }
+
+    [RelayCommand]
+    private void OpenTrafficPage()
+    {
+        IsSettingsOpen = false;
+        ServiceViewModel.IsOpen = false;
+        IsAboutOpen = false;
+        IsTrafficOpen = true;
+    }
+
+    [RelayCommand]
+    private void CloseTrafficPage() => IsTrafficOpen = false;
 
     [RelayCommand]
     private void OpenAbout()
@@ -826,6 +895,7 @@ public partial class MainViewModel : ObservableObject
         IsSettingsOpen = false;
         ServiceViewModel.IsOpen = false;
         IsAboutOpen = true;
+        IsTrafficOpen = false;
         _ = RefreshSelfUpdateStatusAsync();
     }
 

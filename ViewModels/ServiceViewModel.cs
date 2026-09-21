@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ZapretGui.Models;
@@ -19,15 +20,9 @@ public partial class ServiceViewModel : ObservableObject
 
     public LocalizationService Loc => LocalizationService.Instance;
 
-    [ObservableProperty]
-    private ObservableCollection<ServiceTaskItem> _tasks = new();
-
-    [ObservableProperty]
-    private ObservableCollection<NotificationItem> _notifications = new();
-
-    [ObservableProperty]
-    private bool _isOpen;
-
+    [ObservableProperty] private ObservableCollection<ServiceTaskItem> _tasks = new();
+    [ObservableProperty] private ObservableCollection<NotificationItem> _notifications = new();
+    [ObservableProperty] private bool _isOpen;
     [ObservableProperty] private bool _isFakesModalOpen;
     [ObservableProperty] private int _selectedFakeTypeIndex;
     [ObservableProperty] private int _selectedFakeFileIndex;
@@ -36,40 +31,35 @@ public partial class ServiceViewModel : ObservableObject
     public ObservableCollection<string> FakeFiles { get; } = new();
 
     public bool CanApplyFakes =>
-        SelectedFakeTypeIndex >= 0
-        && SelectedFakeFileIndex >= 0
-        && FakeFiles.Count > 0;
+        SelectedFakeTypeIndex >= 0 &&
+        SelectedFakeFileIndex >= 0 &&
+        FakeFiles.Count > 0;
+
+    [ObservableProperty] private string _excludeIpText = string.Empty;
+    [ObservableProperty] private string _newSiteText = string.Empty;
+    [ObservableProperty] private string _newExcludeSiteText = string.Empty;
+    [ObservableProperty] private ObservableCollection<string> _sites = new();
+    [ObservableProperty] private ObservableCollection<string> _excludeSites = new();
+    [ObservableProperty] private string _settingsStatusText = string.Empty;
 
     public ServiceViewModel(string zapretFolderPath, Func<ZapretPreset?> getSelectedPreset)
     {
         _serviceManager = new ServiceManager(zapretFolderPath);
         _getSelectedPreset = getSelectedPreset;
-        InitTasks();
 
         LocalizationService.Instance.PropertyChanged += OnLocChanged;
+    }
+
+    public void LoadTabData()
+    {
+        _ = LoadIpExcludeAsync();
+        _ = LoadSitesAsync();
     }
 
     private void OnLocChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Item[]")
             ApplyTaskLocalization();
-    }
-
-    private void InitTasks()
-    {
-        Tasks = new ObservableCollection<ServiceTaskItem>
-        {
-            new() { Icon = "🔍", CommandLabel = "diagnostics"   },
-            new() { Icon = "🌐", CommandLabel = "ipset_update"  },
-            new() { Icon = "📝", CommandLabel = "hosts_check"   },
-            new() { Icon = "🔄", CommandLabel = "replace_fakes" }
-        };
-
-        foreach (var t in Tasks)
-            foreach (var s in t.SubActions)
-                s.Parent = t;
-
-        ApplyTaskLocalization();
     }
 
     private void ApplyTaskLocalization()
@@ -101,6 +91,7 @@ public partial class ServiceViewModel : ObservableObject
         }
     }
 
+
     [RelayCommand]
     private Task RunTaskAsync(ServiceTaskItem task)
     {
@@ -109,7 +100,6 @@ public partial class ServiceViewModel : ObservableObject
             OpenFakesDialog();
             return Task.CompletedTask;
         }
-
         return RunTaskInternalAsync(task, null);
     }
 
@@ -150,6 +140,153 @@ public partial class ServiceViewModel : ObservableObject
 
         task.IsExpanded = task.HasOutput;
         _ = ShowNotificationAsync(task);
+    }
+
+
+    private async Task LoadIpExcludeAsync()
+    {
+        try
+        {
+            var content = await _serviceManager.ReadIpExcludeAsync();
+            await Dispatcher.UIThread.InvokeAsync(() => ExcludeIpText = content);
+        }
+        catch { }
+    }
+
+    [RelayCommand]
+    private async Task UpdateIpsetAsync()
+    {
+        var (ok, output) = await _serviceManager.RunAsync("ipset_update");
+        SettingsStatusText = output;
+        ShowToast(ok ? Loc["TaskIpsetTitle"] : Loc["StatusFailed"], output, !ok);
+    }
+
+    [RelayCommand]
+    private async Task UpdateHostsAsync()
+    {
+        var (ok, output) = await _serviceManager.ForceUpdateHostsAsync();
+        SettingsStatusText = output;
+        ShowToast(Loc["BtnUpdateHosts"], output, !ok);
+    }
+
+    [RelayCommand]
+    private async Task SaveExcludeIpsAsync()
+    {
+        await _serviceManager.WriteIpExcludeAsync(ExcludeIpText);
+        var count = (ExcludeIpText ?? string.Empty)
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Count(l => !string.IsNullOrWhiteSpace(l));
+
+        var msg = string.Format(Loc["MsgExcludeIpsSaved"], count);
+        SettingsStatusText = msg;
+        ShowToast(Loc["BtnSaveExcludeIps"], msg, false);
+    }
+
+
+    private async Task LoadSitesAsync()
+    {
+        try
+        {
+            var sites    = await _serviceManager.ReadListAsync(ServiceManager.ListGeneralUser);
+            var excludes = await _serviceManager.ReadListAsync(ServiceManager.ListExcludeUser);
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                Sites.Clear();
+                foreach (var s in sites) Sites.Add(s);
+
+                ExcludeSites.Clear();
+                foreach (var s in excludes) ExcludeSites.Add(s);
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Sites] LoadSitesAsync failed: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task AddSiteAsync()
+    {
+        var entry = (NewSiteText ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(entry)) return;
+
+        var added = await _serviceManager.AppendToListAsync(ServiceManager.ListGeneralUser, entry);
+        if (added)
+        {
+            Sites.Add(entry);
+            NewSiteText = string.Empty;
+            ShowToast(Loc["BtnAddSite"], string.Format(Loc["MsgSiteAdded"], entry), false);
+        }
+        else
+        {
+            ShowToast(Loc["BtnAddSite"], string.Format(Loc["MsgSiteExists"], entry), true);
+        }
+    }
+
+    [RelayCommand]
+    private async Task AddExcludeSiteAsync()
+    {
+        var entry = (NewExcludeSiteText ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(entry)) return;
+
+        var added = await _serviceManager.AppendToListAsync(ServiceManager.ListExcludeUser, entry);
+        if (added)
+        {
+            ExcludeSites.Add(entry);
+            NewExcludeSiteText = string.Empty;
+            ShowToast(Loc["BtnAddExcludeSite"], string.Format(Loc["MsgSiteAddedExclude"], entry), false);
+        }
+        else
+        {
+            ShowToast(Loc["BtnAddExcludeSite"], string.Format(Loc["MsgSiteExists"], entry), true);
+        }
+    }
+
+    [RelayCommand]
+    private async Task RemoveSiteAsync(string? site)
+    {
+        if (string.IsNullOrWhiteSpace(site)) return;
+
+        try
+        {
+            var list = await _serviceManager.ReadListAsync(ServiceManager.ListGeneralUser);
+            list.RemoveAll(x => x.Equals(site, StringComparison.OrdinalIgnoreCase));
+            await _serviceManager.WriteListAsync(ServiceManager.ListGeneralUser, list);
+
+            var found = Sites.FirstOrDefault(x => x.Equals(site, StringComparison.OrdinalIgnoreCase));
+            if (found != null) Sites.Remove(found);
+
+            ShowToast(Loc["BtnAddSite"],
+                    $"Удалён: {site}", false);
+        }
+        catch (Exception ex)
+        {
+            ShowToast(Loc["BtnAddSite"], $"Ошибка удаления: {ex.Message}", true);
+        }
+    }
+
+    [RelayCommand]
+    private async Task RemoveExcludeSiteAsync(string? site)
+    {
+        if (string.IsNullOrWhiteSpace(site)) return;
+
+        try
+        {
+            var list = await _serviceManager.ReadListAsync(ServiceManager.ListExcludeUser);
+            list.RemoveAll(x => x.Equals(site, StringComparison.OrdinalIgnoreCase));
+            await _serviceManager.WriteListAsync(ServiceManager.ListExcludeUser, list);
+
+            var found = ExcludeSites.FirstOrDefault(x => x.Equals(site, StringComparison.OrdinalIgnoreCase));
+            if (found != null) ExcludeSites.Remove(found);
+
+            ShowToast(Loc["BtnAddExcludeSite"],
+                    $"Удалён: {site}", false);
+        }
+        catch (Exception ex)
+        {
+            ShowToast(Loc["BtnAddExcludeSite"], $"Ошибка удаления: {ex.Message}", true);
+        }
     }
 
     [RelayCommand]
@@ -207,6 +344,19 @@ public partial class ServiceViewModel : ObservableObject
     private void DismissNotification(NotificationItem n)
     {
         if (Notifications.Contains(n)) Notifications.Remove(n);
+    }
+
+    private void ShowToast(string title, string message, bool isError)
+    {
+        var n = new NotificationItem
+        {
+            Title = title,
+            Message = message,
+            IsError = isError
+        };
+        Notifications.Add(n);
+        _ = Task.Delay(NotificationLifetimeMs).ContinueWith(_ =>
+            Dispatcher.UIThread.Post(() => Notifications.Remove(n)));
     }
 
     private async Task ShowNotificationAsync(ServiceTaskItem task)

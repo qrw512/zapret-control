@@ -13,6 +13,7 @@ public class AppConfig
     public string LastSelectedPreset { get; set; } = string.Empty;
     public bool StartWithWindows { get; set; } = false;
     public bool AutoStartBypass { get; set; } = false;
+    public int BypassModeIndex { get; set; } = 0;
 }
 
 public class ConfigService

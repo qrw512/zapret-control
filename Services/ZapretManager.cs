@@ -1,8 +1,15 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace ZapretGui.Services;
+
+public enum BypassMode
+{
+    Whitelist,
+    AllSites 
+}
 
 public class ZapretManager
 {
@@ -10,7 +17,7 @@ public class ZapretManager
     private string? _lastHiddenBatPath;
     private string? _vbsPath;
 
-    public bool StartZapret(string batchPath)
+    public bool StartZapret(string batchPath, BypassMode mode = BypassMode.Whitelist)
     {
         try
         {
@@ -30,6 +37,21 @@ public class ZapretManager
                              .Replace("start \"\" \"%BIN%winws.exe\"", "\"%BIN%winws.exe\"");
 
             content = content.Replace("%~dp0", batchDir + Path.DirectorySeparatorChar);
+
+            if (mode == BypassMode.AllSites)
+            {
+                content = Regex.Replace(content,
+                    @"--hostlist-auto\s*=\s*(""[^""]*""|\S+)",
+                    string.Empty,
+                    RegexOptions.IgnoreCase);
+
+                content = Regex.Replace(content,
+                    @"--hostlist\s*=\s*(""[^""]*""|\S+)",
+                    string.Empty,
+                    RegexOptions.IgnoreCase);
+
+                content = Regex.Replace(content, @"\s{2,}", " ");
+            }
 
             File.WriteAllText(_lastHiddenBatPath, content);
 

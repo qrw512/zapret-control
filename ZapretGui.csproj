@@ -7,12 +7,13 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <ApplicationIcon>Assets\app-256.ico</ApplicationIcon>
     <NoWarn>$(NoWarn);CA1416</NoWarn>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.2" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3">
@@ -20,14 +21,16 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.2.6" />
     <PackageReference Include="Octokit" Version="14.0.0" />
+    <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="12.0.0.17" />
   </ItemGroup>
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\app.png" />
         <AvaloniaResource Include="Assets\app-white.png" />
         <AvaloniaResource Include="Assets\app-dark.png" />
-
+        <AvaloniaResource Include="Assets\**" />
         <AvaloniaResource Include="Assets\app-16.ico" />
         <AvaloniaResource Include="Assets\app-32.ico" />
         <AvaloniaResource Include="Assets\app-48.ico" />

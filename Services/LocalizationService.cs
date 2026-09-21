@@ -28,6 +28,7 @@ public class LocalizationService : INotifyPropertyChanged
     {
         ["RU"] = new()
         {
+            // ==== Общие ====
             ["BypassModes"]      = "Режимы обхода",
             ["Settings"]         = "Настройки",
             ["SettingsTitle"]    = "Настройки",
@@ -51,12 +52,16 @@ public class LocalizationService : INotifyPropertyChanged
             ["UpdateCheckFailed"] = "Не удалось проверить обновления",
             ["MainSubtitle"]     = "Управление службой",
             ["BtnTools"]         = "Инструменты",
+
+            // ==== Tray ====
             ["TrayOpen"]  = "Открыть",
             ["TrayToggleStart"]   = "Включить обход",
             ["TrayToggleStop"]    = "Выключить обход",
             ["TrayPresetsHeader"] = "Режим обхода",
             ["TrayExit"]  = "Выход",
-            ["ServiceViewTitle"]    = "Центр обслуживания Zapret (Beta)",
+
+            // ==== ServiceView ====
+            ["ServiceViewTitle"]    = "Центр обслуживания Zapret",
             ["ServiceViewSubtitle"] = "Управление компонентами, службой и диагностикой без консоли",
             ["BtnRun"]              = "Запустить",
             ["BtnShowOutput"]       = "Показать / скрыть вывод",
@@ -65,6 +70,48 @@ public class LocalizationService : INotifyPropertyChanged
             ["StatusDone"]          = "Успешно выполнено",
             ["StatusFailed"]        = "Завершено с ошибкой",
             ["SelectedFormat"] = "Выбран: {0}",
+
+            // ==== Tabs ====
+            ["TabIpSettings"]   = "Настройки IP",
+            ["TabSiteLists"]    = "Список сайтов",
+            ["TabDiagnostics"]  = "Диагностика",
+
+            // ==== IP tab ====
+            ["IpUpdateHint"]      = "Обновление глобальных списков IP-адресов и файла hosts:",
+            ["IpExcludeHint"]     = "Исключения IP-адресов (по одному в строке, поддерживаются CIDR и подсети):",
+            ["IpExcludeWatermark"]= "192.168.0.0/16\n10.0.0.0/8",
+            ["BtnUpdateIpset"]    = "Обновить список IP",
+            ["BtnUpdateHosts"]    = "Обновить hosts",
+            ["BtnSaveExcludeIps"] = "Сохранить исключения",
+            ["MsgIpsetUpdateOk"]  = "[OK] Список IP обновлён ({0} байт)",
+            ["MsgHostsUpdateOk"]  = "[OK] Файл hosts обновлён",
+            ["MsgExcludeIpsSaved"]= "[OK] Исключения IP сохранены ({0} записей)",
+
+            // ==== Sites tab ====
+            ["SiteAddHint"]        = "Обход (whitelist) — домены, которые принудительно обрабатываются Zapret:",
+            ["SiteExcludeHint"]    = "Исключения (blacklist) — домены, которые НЕ обрабатываются Zapret:",
+            ["BtnAddSite"]         = "Добавить в обход",
+            ["BtnAddExcludeSite"]  = "Добавить в исключения",
+            ["CurrentSites"]       = "Текущий whitelist",
+            ["CurrentExcludes"]    = "Текущий blacklist",
+            ["MsgSiteAdded"]       = "[OK] Сайт добавлен: {0}",
+            ["MsgSiteExists"]      = "[!] Сайт уже в списке: {0}",
+            ["MsgSiteAddedExclude"]= "[OK] Добавлено в исключения: {0}",
+
+            // ==== Traffic ====
+            ["TrafficTitle"]         = "Мониторинг трафика (Beta)",
+            ["TrafficSubtitle"]      = "Активность сетевых процессов в реальном времени",
+            ["TrafficUpload"]        = "Отправка",
+            ["TrafficDownload"]      = "Загрузка",
+            ["TrafficProcess"]       = "Процесс",
+            ["TrafficZapretTag"]     = "ZAPRET",
+            ["BtnStartMonitor"]      = "Запустить",
+            ["BtnStopMonitor"]       = "Остановить",
+            ["TrafficNeedsAdmin"]    = "Для мониторинга трафика требуются права администратора",
+            ["TrafficNoData"]        = "Нет активных сетевых соединений",
+            ["TrafficTotal"]         = "Итого",
+
+            // ==== Tasks ====
             ["TaskDiagnosticsTitle"] = "Диагностика проблем",
             ["TaskDiagnosticsDesc"]  = "Проверка целостности компонентов, драйверов и окружения",
             ["TaskStatusTitle"]      = "Статус службы и winws",
@@ -77,6 +124,8 @@ public class LocalizationService : INotifyPropertyChanged
             ["TaskFakesDesc"]        = "Обновление и ротация поддельных TLS/HTTP пакетов",
             ["TaskTestsTitle"]       = "Встроенное тестирование",
             ["TaskTestsDesc"]        = "Запуск тестов работоспособности через PowerShell",
+
+            // ==== Preset menu ====
             ["PresetMenuTooltip"]  = "Тесты и действия",
             ["MenuTestCurrent"]   = "Проверить текущий режим",
             ["MenuTestAll"]       = "Проверить все режимы",
@@ -94,6 +143,8 @@ public class LocalizationService : INotifyPropertyChanged
             ["MsgTestsNeedAdmin"] = "Тестирование возможно только при запуске Zapret Control от имени администратора.",
             ["TestStandard"]         = "Стандартные тесты",
             ["TestDpi"]              = "DPI checkers",
+
+            // ==== Settings ====
             ["AutoStart"]            = "Автозагрузка Zapret",
             ["AutoStartDesc"]        = "Установить службу с последним выбранным пресетом. Работает при старте Windows.",
             ["GameFilter"]           = "Игровой фильтр (Game-Filter)",
@@ -102,6 +153,13 @@ public class LocalizationService : INotifyPropertyChanged
             ["GameFilterAll"]        = "TCP и UDP",
             ["GameFilterTcp"]        = "Только TCP",
             ["GameFilterUdp"]        = "Только UDP",
+            ["SettingsSubtitle"]      = "Настройки приложения и обхода",
+            ["AutoStartCardTitle"]    = "Автозапуск",
+            ["AutoStartCardDesc"]     = "Управление запуском приложения и обхода при старте системы",
+            ["ThemeDesc"]             = "Цветовая схема приложения",
+            ["LanguageDesc"]          = "Язык интерфейса приложения",
+
+            // ==== ServiceManager messages ====
             ["MsgNeedAdmin"]         = "Требуются права администратора (запустите Zapret Control от имени администратора)",
             ["MsgNoPreset"]          = "Не выбран preset",
             ["MsgPresetNotFound"]    = "Preset не найден: {0}",
@@ -137,6 +195,11 @@ public class LocalizationService : INotifyPropertyChanged
             ["MsgServiceInstalledOk"] = "[OK] Служба установлена: {0}",
             ["MsgServiceRemovedOk"]  = "[OK] Служба удалена",
             ["MsgError"]             = "[X] {0}",
+            ["TrafficNotAdmin"] = "Для мониторинга трафика нужны права администратора. Перезапустите Zapret Control от имени администратора.",
+            ["TrafficEtwError"] = "Не удалось запустить ETW-сессию",
+            ["TrafficSessionLimit"] = "Достигнут лимит ETW-сессий Windows. Закройте другие программы мониторинга (PerfView, Visual Studio Diagnostic Tools, Process Monitor) и перезапустите мониторинг.",
+
+            // ==== Fakes ====
             ["FakesModalTitle"]  = "Замена активных Fakes",
             ["FakesTypeLabel"]   = "Тип подмены",
             ["FakesFileLabel"]   = "Файл подмены",
@@ -144,26 +207,45 @@ public class LocalizationService : INotifyPropertyChanged
             ["FakesTypeGame"]    = "GameFilter UDP",
             ["BtnApply"]         = "Применить",
             ["BtnCancel"]        = "Отмена",
+
+            // ==== Автозапуск ====
             ["StartWithWindows"]         = "Запускать с Windows",
             ["StartWithWindowsDesc"]     = "Zapret Control будет стартовать при входе в систему и сворачиваться в трей.",
             ["AutoStartBypass"]          = "Автозапуск обхода",
             ["AutoStartBypassDesc"]      = "Автоматически включать обход с последним выбранным режимом при старте приложения.",
             ["StatusSwitching"] = "Переключение режима: {0}…",
+
+            // ==== Self update ====
             ["SelfUpdateTitle"]         = "Обновление программы",
             ["SelfUpdateAvailableFmt"]  = "Доступна новая версия {0} (у вас {1}). Обновить сейчас?",
             ["SelfUpdateDownloading"]   = "Загрузка обновления…",
             ["SelfUpdateFailed"]        = "Не удалось выполнить обновление. Скачайте новую версию вручную с GitHub - https://github.com/qrw512/zapret-control.",
             ["SelfUpdateYes"]           = "Обновить",
             ["SelfUpdateNo"]            = "Позже",
+
+            // ==== About ====
             ["About"]              = "О программе",
             ["AppVersionLabel"]    = "Версия приложения",
             ["GitHubProjectLabel"] = "Проект на GitHub",
             ["OpenInBrowser"]      = "Открыть в браузере",
             ["CheckForUpdates"]    = "Проверить обновления",
             ["UpToDateMsg"]        = "У вас установлена последняя версия",
+
+            // ==== Bypass mode ====
+            ["BypassModeWhitelist"]    = "Только из списка",
+            ["BypassModeAll"]          = "Все сайты",
+            ["BypassModeHintWhitelist"] = "Обход только для доменов из whitelist",
+            ["BypassModeHintAll"]       = "Обход всего трафика без фильтрации",
+
+            // Кнопки тестов (переехали в нижнюю панель)
+            ["BtnTestStandard"]        = "Тест обхода",
+            ["BtnTestDpi"]             = "Тест DPI",
+            ["BtnTestStandardTip"]     = "Быстрая проверка: работает ли обход с текущим пресетом",
+            ["BtnTestDpiTip"]          = "Глубокий тест: проверка обхода популярных DPI-ресурсов",
         },
         ["EN"] = new()
         {
+            // ==== Common ====
             ["BypassModes"]      = "Bypass Modes",
             ["Settings"]         = "Settings",
             ["SettingsTitle"]    = "Settings",
@@ -187,12 +269,16 @@ public class LocalizationService : INotifyPropertyChanged
             ["UpdateCheckFailed"] = "Failed to check for updates",
             ["MainSubtitle"]     = "Service management",
             ["BtnTools"]         = "Tools",
+
+            // ==== Tray ====
             ["TrayOpen"]  = "Open",
             ["TrayToggleStart"]   = "Enable bypass",
             ["TrayToggleStop"]    = "Disable bypass",
             ["TrayPresetsHeader"] = "Bypass mode",
             ["TrayExit"]  = "Exit",
-            ["ServiceViewTitle"]    = "Zapret Service Center (Beta)",
+
+            // ==== ServiceView ====
+            ["ServiceViewTitle"]    = "Zapret Service Center",
             ["ServiceViewSubtitle"] = "Manage components, service and diagnostics without console",
             ["BtnRun"]              = "Run",
             ["BtnShowOutput"]       = "Show / hide output",
@@ -201,6 +287,48 @@ public class LocalizationService : INotifyPropertyChanged
             ["StatusDone"]          = "Completed successfully",
             ["StatusFailed"]        = "Completed with error",
             ["SelectedFormat"] = "Selected: {0}",
+
+            // ==== Tabs ====
+            ["TabIpSettings"]   = "IP Settings",
+            ["TabSiteLists"]    = "Site Lists",
+            ["TabDiagnostics"]  = "Diagnostics",
+
+            // ==== IP tab ====
+            ["IpUpdateHint"]      = "Update global IP lists and hosts file:",
+            ["IpExcludeHint"]     = "IP exclusions (one per line, CIDR supported):",
+            ["IpExcludeWatermark"]= "192.168.0.0/16\n10.0.0.0/8",
+            ["BtnUpdateIpset"]    = "Update IP list",
+            ["BtnUpdateHosts"]    = "Update hosts",
+            ["BtnSaveExcludeIps"] = "Save exclusions",
+            ["MsgIpsetUpdateOk"]  = "[OK] IP list updated ({0} bytes)",
+            ["MsgHostsUpdateOk"]  = "[OK] hosts file updated",
+            ["MsgExcludeIpsSaved"]= "[OK] IP exclusions saved ({0} entries)",
+
+            // ==== Sites tab ====
+            ["SiteAddHint"]        = "Whitelist — domains forced through Zapret:",
+            ["SiteExcludeHint"]    = "Blacklist — domains bypassing Zapret:",
+            ["BtnAddSite"]         = "Add to whitelist",
+            ["BtnAddExcludeSite"]  = "Add to exceptions",
+            ["CurrentSites"]       = "Current whitelist",
+            ["CurrentExcludes"]    = "Current blacklist",
+            ["MsgSiteAdded"]       = "[OK] Site added: {0}",
+            ["MsgSiteExists"]      = "[!] Site already in list: {0}",
+            ["MsgSiteAddedExclude"]= "[OK] Added to exceptions: {0}",
+
+            // ==== Traffic ====
+            ["TrafficTitle"]         = "Traffic Monitor (Beta)",
+            ["TrafficSubtitle"]      = "Real-time network activity by process",
+            ["TrafficUpload"]        = "Upload",
+            ["TrafficDownload"]      = "Download",
+            ["TrafficProcess"]       = "Process",
+            ["TrafficZapretTag"]     = "ZAPRET",
+            ["BtnStartMonitor"]      = "Start",
+            ["BtnStopMonitor"]       = "Stop",
+            ["TrafficNeedsAdmin"]    = "Administrator rights required to monitor traffic",
+            ["TrafficNoData"]        = "No active network connections",
+            ["TrafficTotal"]         = "Total",
+
+            // ==== Tasks ====
             ["TaskDiagnosticsTitle"] = "Diagnostics",
             ["TaskDiagnosticsDesc"]  = "Check components, drivers and environment integrity",
             ["TaskStatusTitle"]      = "Service and winws status",
@@ -213,6 +341,8 @@ public class LocalizationService : INotifyPropertyChanged
             ["TaskFakesDesc"]        = "Rotate and update fake TLS/HTTP packets",
             ["TaskTestsTitle"]       = "Built-in tests",
             ["TaskTestsDesc"]        = "Run performance tests through PowerShell",
+
+            // ==== Preset menu ====
             ["PresetMenuTooltip"]  = "Tests and actions",
             ["MenuTestCurrent"]   = "Test current mode",
             ["MenuTestAll"]       = "Test all modes",
@@ -230,6 +360,8 @@ public class LocalizationService : INotifyPropertyChanged
             ["MsgTestsNeedAdmin"] = "Tests can be run only when Zapret Control is launched as Administrator.",
             ["TestStandard"]         = "Standard tests",
             ["TestDpi"]              = "DPI checkers",
+
+            // ==== Settings ====
             ["AutoStart"]            = "Zapret AutoStart",
             ["AutoStartDesc"]        = "Install service with the last selected preset. Runs on Windows startup.",
             ["GameFilter"]           = "Game Filter",
@@ -238,6 +370,13 @@ public class LocalizationService : INotifyPropertyChanged
             ["GameFilterAll"]        = "TCP and UDP",
             ["GameFilterTcp"]        = "TCP only",
             ["GameFilterUdp"]        = "UDP only",
+            ["SettingsSubtitle"]      = "Application and bypass settings",
+            ["AutoStartCardTitle"]    = "Auto-start",
+            ["AutoStartCardDesc"]     = "Manage app launch and bypass on system startup",
+            ["ThemeDesc"]             = "Application color scheme",
+            ["LanguageDesc"]          = "Application interface language",
+
+            // ==== ServiceManager messages ====
             ["MsgNeedAdmin"]         = "Administrator rights required (run Zapret Control as Administrator)",
             ["MsgNoPreset"]          = "No preset selected",
             ["MsgPresetNotFound"]    = "Preset not found: {0}",
@@ -273,6 +412,11 @@ public class LocalizationService : INotifyPropertyChanged
             ["MsgServiceInstalledOk"] = "[OK] Service installed: {0}",
             ["MsgServiceRemovedOk"]  = "[OK] Service removed",
             ["MsgError"]             = "[X] {0}",
+            ["TrafficNotAdmin"] = "Administrator rights are required for traffic monitoring. Restart Zapret Control as Administrator.",
+            ["TrafficEtwError"] = "Failed to start ETW session",
+            ["TrafficSessionLimit"] = "Windows ETW session limit reached. Close other monitoring tools (PerfView, Visual Studio Diagnostic Tools, Process Monitor) and restart monitoring.",
+
+            // ==== Fakes ====
             ["FakesModalTitle"]  = "Replace active Fakes",
             ["FakesTypeLabel"]   = "Fake type",
             ["FakesFileLabel"]   = "Fake file",
@@ -280,23 +424,42 @@ public class LocalizationService : INotifyPropertyChanged
             ["FakesTypeGame"]    = "GameFilter UDP",
             ["BtnApply"]         = "Apply",
             ["BtnCancel"]        = "Cancel",
+
+            // ==== Auto-start ====
             ["StartWithWindows"]         = "Start with Windows",
             ["StartWithWindowsDesc"]     = "Zapret Control will launch on system startup and minimize to tray.",
             ["AutoStartBypass"]          = "Auto-start bypass",
             ["AutoStartBypassDesc"]      = "Automaticlly enable bypass with the last selected mode when the app starts.",
             ["StatusSwitching"] = "Switching mode: {0}…",
+
+            // ==== Self update ====
             ["SelfUpdateTitle"]         = "Application update",
             ["SelfUpdateAvailableFmt"]  = "Version {0} is available (you have {1}). Update now?",
             ["SelfUpdateDownloading"]   = "Downloading update…",
             ["SelfUpdateFailed"]        = "Update failed. Please download the new version manually from GitHub - https://github.com/qrw512/zapret-control.",
             ["SelfUpdateYes"]           = "Update",
             ["SelfUpdateNo"]            = "Later",
+
+            // ==== About ====
             ["About"]              = "About",
             ["AppVersionLabel"]    = "App version",
             ["GitHubProjectLabel"] = "GitHub project",
             ["OpenInBrowser"]      = "Open in browser",
             ["CheckForUpdates"]    = "Check for updates",
             ["UpToDateMsg"]        = "You have the latest version",
+
+            // ==== Bypass mode ====
+            ["BypassModeWhitelist"]    = "Whitelist only",
+            ["BypassModeAll"]          = "All sites",
+            ["BypassModeHintWhitelist"] = "Bypass only domains from the whitelist",
+            ["BypassModeHintAll"]       = "Bypass all traffic without filtering",
+
+            // Test buttons (moved to the bottom bar)
+            ["BtnTestStandard"]        = "Test bypass",
+            ["BtnTestDpi"]             = "Test DPI",
+            ["BtnTestStandardTip"]     = "Quick check: is the current preset working",
+            ["BtnTestDpiTip"]          = "Deep test: check DPI bypass against popular resources",
+
         }
     };
 
