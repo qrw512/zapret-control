@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Principal;
+using System.Text;
+using System.Threading.Tasks;
 using Avalonia;
 using ZapretGui.Services;
 
@@ -12,6 +14,28 @@ class Program
 {
     [STAThread]
     public static void Main(string[] args)
+    {
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+            WriteCrashLog("AppDomain.UnhandledException", e.ExceptionObject as Exception);
+
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            WriteCrashLog("TaskScheduler.UnobservedTaskException", e.Exception);
+            e.SetObserved();
+        };
+
+        try
+        {
+            RunApp(args);
+        }
+        catch (Exception ex)
+        {
+            WriteCrashLog("Main", ex);
+            throw;
+        }
+    }
+
+    private static void RunApp(string[] args)
     {
         AppPaths.EnsureCreated();
 
@@ -34,6 +58,61 @@ class Program
         finally
         {
             SingleInstanceService.Stop();
+        }
+    }
+
+    public static void WriteCrashLog(string source, Exception? ex)
+    {
+        try
+        {
+            var logsDir = AppPaths.Logs;
+            Directory.CreateDirectory(logsDir);
+
+            var path = Path.Combine(logsDir, $"crash-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.log");
+            var sb = new StringBuilder();
+
+            sb.AppendLine("=== CRASH ===");
+            sb.AppendLine($"Source: {source}");
+            sb.AppendLine($"Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}");
+            sb.AppendLine($"OS: {Environment.OSVersion}");
+            sb.AppendLine($".NET: {Environment.Version}");
+            sb.AppendLine($"App version: {typeof(Program).Assembly.GetName().Version}");
+            sb.AppendLine($"Command line: {Environment.CommandLine}");
+            sb.AppendLine();
+
+            if (ex != null)
+            {
+                sb.AppendLine("--- Exception ---");
+                sb.AppendLine($"Type: {ex.GetType().FullName}");
+                sb.AppendLine($"Message: {ex.Message}");
+                sb.AppendLine();
+                sb.AppendLine("--- StackTrace ---");
+                sb.AppendLine(ex.StackTrace);
+                sb.AppendLine();
+
+                var inner = ex.InnerException;
+                int depth = 1;
+                while (inner != null)
+                {
+                    sb.AppendLine($"--- Inner Exception #{depth} ---");
+                    sb.AppendLine($"Type: {inner.GetType().FullName}");
+                    sb.AppendLine($"Message: {inner.Message}");
+                    sb.AppendLine(inner.StackTrace);
+                    sb.AppendLine();
+                    inner = inner.InnerException;
+                    depth++;
+                }
+            }
+            else
+            {
+                sb.AppendLine("Exception object is null.");
+            }
+
+            File.WriteAllText(path, sb.ToString(), Encoding.UTF8);
+        }
+        catch
+        {
+            // если не удалось записать лог — молча игнорируем
         }
     }
 

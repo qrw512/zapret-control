@@ -17,6 +17,7 @@ namespace ZapretGui.Services;
 public class TrafficMonitorService : IDisposable
 {
     private const string SessionPrefix = "ZapretTraffic_";
+    private static readonly int CurrentPid = Environment.ProcessId;
 
     private TraceEventSession? _session;
     private string? _sessionName;
@@ -37,6 +38,7 @@ public class TrafficMonitorService : IDisposable
 
     public bool IsRunning => _session != null;
     public string LastError { get; private set; } = string.Empty;
+
     [DllImport("advapi32.dll", SetLastError = true)]
     private static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, out IntPtr TokenHandle);
 
@@ -105,8 +107,8 @@ public class TrafficMonitorService : IDisposable
         EnablePrivilege("SeSystemProfilePrivilege");
         EnablePrivilege("SeProfileSingleProcessPrivilege");
     }
-
-    private static readonly HashSet<string> SystemProcesses = new(StringComparer.OrdinalIgnoreCase)
+    
+    private static readonly HashSet<string> IgnoredProcesses = new(StringComparer.OrdinalIgnoreCase)
     {
         "Idle", "System", "Registry", "Memory Compression", "Secure System",
         "smss", "csrss", "wininit", "services", "lsass", "winlogon",
@@ -116,7 +118,14 @@ public class TrafficMonitorService : IDisposable
         "RuntimeBroker", "backgroundTaskHost", "dllhost", "WmiPrvSE",
         "taskhostw", "ShellExperienceHost", "StartMenuExperienceHost",
         "ApplicationFrameHost", "TextInputHost", "SettingSyncHost",
-        "conhost", "audiodg", "spoolsv", "WUDFHost"
+        "conhost", "audiodg", "spoolsv", "WUDFHost", "nvcontainer",
+        "MoUsoCoreWorker", "usocoreworker", "TrustedInstaller", "TiWorker",
+        "svchost.exe", "wmiprvse.exe", "code",
+        "winws", "winws.exe",
+        "zapret",
+        "WinDivert", "WinDivert14",
+        "ZapretControl",
+        "ZapretGui", "mDNSResponder",
     };
 
     private static void Log(string msg)
@@ -220,7 +229,6 @@ public class TrafficMonitorService : IDisposable
             var keywordCombos = new[]
             {
                 KernelTraceEventParser.Keywords.NetworkTCPIP,
-                KernelTraceEventParser.Keywords.NetworkTCPIP | KernelTraceEventParser.Keywords.NetworkTCPIP,
             };
 
             foreach (var kw in keywordCombos)
@@ -244,10 +252,10 @@ public class TrafficMonitorService : IDisposable
                 throw lastEx ?? new Exception("EnableKernelProvider failed");
             }
 
-            _session.Source.Kernel.TcpIpSend += d => Accumulate(d.ProcessID, d.size, sent: true);
-            _session.Source.Kernel.TcpIpRecv += d => Accumulate(d.ProcessID, d.size, sent: false);
-            _session.Source.Kernel.UdpIpSend += d => Accumulate(d.ProcessID, d.size, sent: true);
-            _session.Source.Kernel.UdpIpRecv += d => Accumulate(d.ProcessID, d.size, sent: false);
+            _session.Source.Kernel.TcpIpSend += d => Accumulate(d.ProcessID, d.size, sent: true,  dport: d.dport, sport: d.sport);
+            _session.Source.Kernel.TcpIpRecv += d => Accumulate(d.ProcessID, d.size, sent: false, dport: d.dport, sport: d.sport);
+            _session.Source.Kernel.UdpIpSend += d => Accumulate(d.ProcessID, d.size, sent: true,  dport: d.dport, sport: d.sport);
+            _session.Source.Kernel.UdpIpRecv += d => Accumulate(d.ProcessID, d.size, sent: false, dport: d.dport, sport: d.sport);
 
             _uiTimer = new Timer(_ => Updated?.Invoke(), null, 1000, 1000);
 
@@ -269,32 +277,35 @@ public class TrafficMonitorService : IDisposable
         }
     }
 
-    private void Accumulate(int pid, int size, bool sent)
+    private bool IsIgnoredProcess(int pid)
     {
-        if (pid <= 0 || size <= 0) return;
+        if (pid == CurrentPid) return true;
 
-        if (!_processNames.TryGetValue(pid, out var name))
+        if (_processNames.TryGetValue(pid, out var cached))
+            return string.IsNullOrEmpty(cached);
+
+        string name;
+        try
         {
-            try
-            {
-                using var p = Process.GetProcessById(pid);
-                name = p.ProcessName;
-
-                if (SystemProcesses.Contains(name))
-                {
-                    _processNames[pid] = string.Empty;
-                    return;
-                }
-            }
-            catch
-            {
-                name = $"PID {pid}";
-            }
-
-            _processNames[pid] = name;
+            using var p = Process.GetProcessById(pid);
+            name = p.ProcessName;
+        }
+        catch
+        {
+            name = string.Empty;
         }
 
-        if (string.IsNullOrEmpty(name)) return;
+        if (string.IsNullOrEmpty(name) || IgnoredProcesses.Contains(name))
+            name = string.Empty;
+
+        _processNames[pid] = name;
+        return string.IsNullOrEmpty(name);
+    }
+
+    private void Accumulate(int pid, int size, bool sent, int dport, int sport)
+    {
+        if (pid <= 0 || size <= 0) return;
+        if (IsIgnoredProcess(pid)) return;
 
         if (sent) _bytesSent.AddOrUpdate(pid, size, (_, v) => v + size);
         else      _bytesReceived.AddOrUpdate(pid, size, (_, v) => v + size);

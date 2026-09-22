@@ -8,7 +8,7 @@ namespace ZapretGui.Services;
 public enum BypassMode
 {
     Whitelist,
-    AllSites 
+    AllSites
 }
 
 public class ZapretManager
@@ -22,51 +22,51 @@ public class ZapretManager
         try
         {
             if (!File.Exists(batchPath)) return false;
+
             var batchDir = Path.GetDirectoryName(batchPath)!;
-            var tempDir = Path.Combine(Path.GetTempPath(), "ZapretGui_run");
+            var tempDir  = Path.Combine(Path.GetTempPath(), "ZapretGui_run");
             Directory.CreateDirectory(tempDir);
 
             _lastHiddenBatPath = Path.Combine(tempDir, "run_hidden.bat");
-            _vbsPath = Path.Combine(tempDir, "run_silent.vbs");
+            _vbsPath           = Path.Combine(tempDir, "run_silent.vbs");
 
             string content = File.ReadAllText(batchPath);
 
-            content = content.Replace("start \"zapret: %~n0\" /min \"%BIN%winws.exe\"", "\"%BIN%winws.exe\"")
-                             .Replace("start \"zapret: %~n0\" \"%BIN%winws.exe\"", "\"%BIN%winws.exe\"")
-                             .Replace("start \"\" /min \"%BIN%winws.exe\"", "\"%BIN%winws.exe\"")
-                             .Replace("start \"\" \"%BIN%winws.exe\"", "\"%BIN%winws.exe\"");
+            content = content
+                .Replace("start \"zapret: %~n0\" /min \"%BIN%winws.exe\"", "\"%BIN%winws.exe\"")
+                .Replace("start \"zapret: %~n0\" \"%BIN%winws.exe\"",       "\"%BIN%winws.exe\"")
+                .Replace("start \"\" /min \"%BIN%winws.exe\"",              "\"%BIN%winws.exe\"")
+                .Replace("start \"\" \"%BIN%winws.exe\"",                   "\"%BIN%winws.exe\"");
 
             content = content.Replace("%~dp0", batchDir + Path.DirectorySeparatorChar);
 
-            if (mode == BypassMode.AllSites)
+            if (mode == BypassMode.Whitelist)
             {
-                content = Regex.Replace(content,
-                    @"--hostlist-auto\s*=\s*(""[^""]*""|\S+)",
-                    string.Empty,
-                    RegexOptions.IgnoreCase);
-
-                content = Regex.Replace(content,
-                    @"--hostlist\s*=\s*(""[^""]*""|\S+)",
-                    string.Empty,
-                    RegexOptions.IgnoreCase);
-
-                content = Regex.Replace(content, @"\s{2,}", " ");
+                content = Regex.Replace(content, @"list-general\.txt", "list-general-user.txt",
+                                        RegexOptions.IgnoreCase);
+                content = Regex.Replace(content, @"list-exclude\.txt", "list-exclude-user.txt",
+                                        RegexOptions.IgnoreCase);
+                content = Regex.Replace(content, @"--hostlist-auto\b", "--hostlist",
+                                        RegexOptions.IgnoreCase);
+                content = Regex.Replace(content, @"ipset-all\.txt", "ipset-exclude-user.txt",
+                                        RegexOptions.IgnoreCase);
+                content = Regex.Replace(content, @"[ \t]{2,}", " ");
             }
 
             File.WriteAllText(_lastHiddenBatPath, content);
 
-            string vbsContent = "Set WshShell = CreateObject(\"WScript.Shell\")\r\n" +
-                                $"WshShell.Run \"cmd.exe /c \" & Chr(34) & \"{_lastHiddenBatPath}\" & Chr(34), 0, False";
-
+            string vbsContent =
+                "Set WshShell = CreateObject(\"WScript.Shell\")\r\n" +
+                $"WshShell.Run \"cmd.exe /c \" & Chr(34) & \"{_lastHiddenBatPath}\" & Chr(34), 0, False";
             File.WriteAllText(_vbsPath, vbsContent);
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = "wscript.exe",
-                Arguments = $"\"{_vbsPath}\"",
+                FileName        = "wscript.exe",
+                Arguments       = $"\"{_vbsPath}\"",
                 WorkingDirectory = batchDir,
-                UseShellExecute = true,
-                Verb = "runas"
+                UseShellExecute  = true,
+                Verb             = "runas"
             };
 
             _process = Process.Start(startInfo);

@@ -77,7 +77,8 @@ public class LocalizationService : INotifyPropertyChanged
             ["TabDiagnostics"]  = "Диагностика",
 
             // ==== IP tab ====
-            ["IpUpdateHint"]      = "Обновление глобальных списков IP-адресов и файла hosts:",
+            ["IpUpdateHint"]      = "Обновление списка ipset-all.txt актуальным из репозитория",
+            ["HostUpdateHint"]      = "Обновление файла hosts для починки веб версии телеграма и подключения к голосовому чату Discord",
             ["IpExcludeHint"]     = "Исключения IP-адресов (по одному в строке, поддерживаются CIDR и подсети):",
             ["IpExcludeWatermark"]= "192.168.0.0/16\n10.0.0.0/8",
             ["BtnUpdateIpset"]    = "Обновить список IP",
@@ -99,7 +100,7 @@ public class LocalizationService : INotifyPropertyChanged
             ["MsgSiteAddedExclude"]= "[OK] Добавлено в исключения: {0}",
 
             // ==== Traffic ====
-            ["TrafficTitle"]         = "Мониторинг трафика (Beta)",
+            ["TrafficTitle"]         = "Мониторинг трафика",
             ["TrafficSubtitle"]      = "Активность сетевых процессов в реальном времени",
             ["TrafficUpload"]        = "Отправка",
             ["TrafficDownload"]      = "Загрузка",
@@ -110,6 +111,12 @@ public class LocalizationService : INotifyPropertyChanged
             ["TrafficNeedsAdmin"]    = "Для мониторинга трафика требуются права администратора",
             ["TrafficNoData"]        = "Нет активных сетевых соединений",
             ["TrafficTotal"]         = "Итого",
+            ["TrafficChartTitle"] = "СКОРОСТЬ В РЕАЛЬНОМ ВРЕМЕНИ",
+            ["TrafficChartDownload"] = "Загрузка",
+            ["TrafficChartUpload"] = "Отправка",
+            ["TrafficChart1MinAgo"] = "-1 мин",
+            ["TrafficChartNow"] = "Сейчас",
+
 
             // ==== Tasks ====
             ["TaskDiagnosticsTitle"] = "Диагностика проблем",
@@ -294,7 +301,8 @@ public class LocalizationService : INotifyPropertyChanged
             ["TabDiagnostics"]  = "Diagnostics",
 
             // ==== IP tab ====
-            ["IpUpdateHint"]      = "Update global IP lists and hosts file:",
+            ["IpUpdateHint"]      = "Updating the ipset-all.txt list to the latest version from the repository.",
+            ["HostUpdateHint"]    = "Updating the hosts file to fix the web version of Telegram and connect to the Discord voice chat.",
             ["IpExcludeHint"]     = "IP exclusions (one per line, CIDR supported):",
             ["IpExcludeWatermark"]= "192.168.0.0/16\n10.0.0.0/8",
             ["BtnUpdateIpset"]    = "Update IP list",
@@ -316,7 +324,7 @@ public class LocalizationService : INotifyPropertyChanged
             ["MsgSiteAddedExclude"]= "[OK] Added to exceptions: {0}",
 
             // ==== Traffic ====
-            ["TrafficTitle"]         = "Traffic Monitor (Beta)",
+            ["TrafficTitle"]         = "Traffic Monitor",
             ["TrafficSubtitle"]      = "Real-time network activity by process",
             ["TrafficUpload"]        = "Upload",
             ["TrafficDownload"]      = "Download",
@@ -327,6 +335,11 @@ public class LocalizationService : INotifyPropertyChanged
             ["TrafficNeedsAdmin"]    = "Administrator rights required to monitor traffic",
             ["TrafficNoData"]        = "No active network connections",
             ["TrafficTotal"]         = "Total",
+            ["TrafficChartTitle"] = "REAL-TIME SPEED",
+            ["TrafficChartDownload"] = "Download",
+            ["TrafficChartUpload"] = "Upload",
+            ["TrafficChart1MinAgo"] = "-1 min",
+            ["TrafficChartNow"] = "Now",
 
             // ==== Tasks ====
             ["TaskDiagnosticsTitle"] = "Diagnostics",

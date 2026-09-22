@@ -63,166 +63,225 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid RowDefinitions="Auto, Auto, Auto, *" Margin="28">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto" Margin="28">
 
-        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,24">
-            <StackPanel VerticalAlignment="Center" Spacing="2">
-                <TextBlock Text="{Binding Loc[TrafficTitle]}" FontSize="26" FontWeight="Bold"/>
-                <TextBlock Text="{Binding Loc[TrafficSubtitle]}" FontSize="13"
-                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-            </StackPanel>
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,24">
+                <StackPanel VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Text="{Binding Loc[TrafficTitle]}" FontSize="26" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Loc[TrafficSubtitle]}" FontSize="13"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Button Classes="state-btn"
+                            Classes.active="{Binding IsMonitoring}"
+                            Command="{Binding StartMonitoringCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <svg:Svg Path="/Assets/ico/play.svg"
+                                     Width="14" Height="14"
+                                     CurrentColor="#FFFFFFFF"
+                                     Stretch="Uniform"
+                                     VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Loc[BtnStartMonitor]}"
+                                       VerticalAlignment="Center"
+                                       Foreground="#FFFFFFFF"/>
+                        </StackPanel>
+                    </Button>
 
-                <Button Classes="state-btn"
-                        Classes.active="{Binding IsMonitoring}"
-                        Command="{Binding StartMonitoringCommand}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <svg:Svg Path="/Assets/ico/play.svg"
-                                 Width="14" Height="14"
-                                 CurrentColor="#FFFFFFFF"
-                                 Stretch="Uniform"
-                                 VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding Loc[BtnStartMonitor]}"
-                                   VerticalAlignment="Center"
-                                   Foreground="#FFFFFFFF"/>
-                    </StackPanel>
-                </Button>
+                    <Button Classes="state-btn"
+                            Classes.active="{Binding !IsMonitoring}"
+                            Command="{Binding StopMonitoringCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <svg:Svg Path="/Assets/ico/stop.svg"
+                                     Width="14" Height="14"
+                                     CurrentColor="#FFFFFFFF"
+                                     Stretch="Uniform"
+                                     VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Loc[BtnStopMonitor]}"
+                                       VerticalAlignment="Center"
+                                       Foreground="#FFFFFFFF"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
 
-                <Button Classes="state-btn"
-                        Classes.active="{Binding !IsMonitoring}"
-                        Command="{Binding StopMonitoringCommand}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <svg:Svg Path="/Assets/ico/stop.svg"
-                                 Width="14" Height="14"
-                                 CurrentColor="#FFFFFFFF"
-                                 Stretch="Uniform"
-                                 VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding Loc[BtnStopMonitor]}"
-                                   VerticalAlignment="Center"
-                                   Foreground="#FFFFFFFF"/>
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-        </Grid>
+            <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="18" Margin="0,0,0,18">
+                <Border Grid.Column="0" Classes="card">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <Border Grid.Column="0" Classes="icon-box" Margin="0,0,18,0">
+                            <svg:Svg Path="/Assets/ico/arrow-down.svg"
+                                     Width="26" Height="26"
+                                     CurrentColor="#FFFFFFFF"
+                                     Stretch="Uniform"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                        </Border>
 
-        <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="18" Margin="0,0,0,18">
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                            <TextBlock Text="{Binding Loc[TrafficDownload]}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            <TextBlock Text="{Binding TotalDownloadRateText}"
+                                       FontSize="24" FontWeight="Bold"/>
+                        </StackPanel>
 
-            <Border Grid.Column="0" Classes="card">
-                <Grid ColumnDefinitions="Auto, *, Auto">
-                    <Border Grid.Column="0" Classes="icon-box" Margin="0,0,18,0">
-                        <svg:Svg Path="/Assets/ico/arrow-down.svg"
-                                 Width="26" Height="26"
-                                 CurrentColor="#FFFFFFFF"
-                                 Stretch="Uniform"
-                                 HorizontalAlignment="Center"
-                                 VerticalAlignment="Center"/>
-                    </Border>
-
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="{Binding Loc[TrafficDownload]}"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                        <TextBlock Text="{Binding TotalDownloadRateText}"
-                                   FontSize="24" FontWeight="Bold"/>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="2">
-                        <TextBlock Text="{Binding Loc[TrafficTotal]}"
-                                   FontSize="10" HorizontalAlignment="Right"
-                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                        <TextBlock Text="{Binding TotalDownloadSumText}"
-                                   FontSize="13" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <Border Grid.Column="1" Classes="card">
-                <Grid ColumnDefinitions="Auto, *, Auto">
-                    <Border Grid.Column="0" Classes="icon-box" Margin="0,0,18,0">
-                        <svg:Svg Path="/Assets/ico/arrow-up.svg"
-                                 Width="26" Height="26"
-                                 CurrentColor="#FFFFFFFF"
-                                 Stretch="Uniform"
-                                 HorizontalAlignment="Center"
-                                 VerticalAlignment="Center"/>
-                    </Border>
-
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="{Binding Loc[TrafficUpload]}"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                        <TextBlock Text="{Binding TotalUploadRateText}"
-                                   FontSize="24" FontWeight="Bold"/>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="2">
-                        <TextBlock Text="{Binding Loc[TrafficTotal]}"
-                                   FontSize="10" HorizontalAlignment="Right"
-                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                        <TextBlock Text="{Binding TotalUploadSumText}"
-                                   FontSize="13" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-        </Grid>
-
-        <Border Grid.Row="2"
-                Margin="0,0,0,18"
-                CornerRadius="12"
-                Padding="14,10"
-                Background="#3AC42B1C"
-                IsVisible="{Binding HasError}">
-            <TextBlock Text="{Binding ErrorMessage}"
-                    FontSize="12"
-                    TextWrapping="Wrap"
-                    Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-        </Border>
-
-        <Border Grid.Row="3" Classes="card" Padding="0">
-            <Grid RowDefinitions="Auto, *">
-
-                <Border Grid.Row="0"
-                        Padding="22,14"
-                        Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
-                        CornerRadius="18,18,0,0">
-                    <Grid ColumnDefinitions="*, 140, 140, 110, 110">
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding Loc[TrafficProcess]}"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding Loc[TrafficDownload]}"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                        <TextBlock Grid.Column="2"
-                                   Text="{Binding Loc[TrafficUpload]}"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                        <TextBlock Grid.Column="3"
-                                   Text="Total ↓"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                        <TextBlock Grid.Column="4"
-                                   Text="Total ↑"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="2">
+                            <TextBlock Text="{Binding Loc[TrafficTotal]}"
+                                       FontSize="10" HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            <TextBlock Text="{Binding TotalDownloadSumText}"
+                                       FontSize="13" FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"/>
+                        </StackPanel>
                     </Grid>
                 </Border>
 
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding Items}">
+                <Border Grid.Column="1" Classes="card">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <Border Grid.Column="0" Classes="icon-box" Margin="0,0,18,0">
+                            <svg:Svg Path="/Assets/ico/arrow-up.svg"
+                                     Width="26" Height="26"
+                                     CurrentColor="#FFFFFFFF"
+                                     Stretch="Uniform"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                            <TextBlock Text="{Binding Loc[TrafficUpload]}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            <TextBlock Text="{Binding TotalUploadRateText}"
+                                       FontSize="24" FontWeight="Bold"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="2">
+                            <TextBlock Text="{Binding Loc[TrafficTotal]}"
+                                       FontSize="10" HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            <TextBlock Text="{Binding TotalUploadSumText}"
+                                       FontSize="13" FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="2" Classes="card" Margin="0,0,0,18" Padding="22,16">
+                <Grid RowDefinitions="Auto, *">
+                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,12">
+                        <TextBlock Text="{Binding Loc[TrafficChartTitle]}" FontSize="11" FontWeight="SemiBold" 
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="8" Height="8" CornerRadius="4"
+                                        Background="{DynamicResource ChartDownloadLineBrush}"
+                                        VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Loc[TrafficChartDownload]}" FontSize="11" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="8" Height="8" CornerRadius="4"
+                                        Background="{DynamicResource ChartUploadLineBrush}"
+                                        VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Loc[TrafficChartUpload]}" FontSize="11" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <Grid Grid.Row="1" Height="200" Margin="0,10,0,0">
+                        <TextBlock Text="{Binding MaxSpeedText}" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0" FontSize="10" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Text="{Binding HalfSpeedText}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,0,0" FontSize="10" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Text="0" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="0,0,0,25" FontSize="10" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+
+                        <TextBlock Text="{Binding Loc[TrafficChart1MinAgo]}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="45,0,0,0" FontSize="10" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Text="{Binding Loc[TrafficChartNow]}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,10,0" FontSize="10" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+
+                        <Viewbox Stretch="Fill" Margin="45,10,10,25">
+                            <Canvas Width="1000" Height="200">
+                                <Line StartPoint="0,0" EndPoint="1000,0" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1"/>
+                                <Line StartPoint="0,50" EndPoint="1000,50" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1"/>
+                                <Line StartPoint="0,100" EndPoint="1000,100" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1"/>
+                                <Line StartPoint="0,150" EndPoint="1000,150" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1"/>
+                                <Line StartPoint="0,200" EndPoint="1000,200" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1"/>
+
+                                <Line StartPoint="0,0" EndPoint="0,200" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1"/>
+                                <Line StartPoint="250,0" EndPoint="250,200" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1"/>
+                                <Line StartPoint="500,0" EndPoint="500,200" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1"/>
+                                <Line StartPoint="750,0" EndPoint="750,200" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1"/>
+                                <Line StartPoint="1000,0" EndPoint="1000,200" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1"/>
+
+                                <Path Data="{Binding DownloadFillGeometry}" Fill="{DynamicResource ChartDownloadFillBrush}"/>
+                                <Path Data="{Binding UploadFillGeometry}" Fill="{DynamicResource ChartUploadFillBrush}"/>
+
+                                <Path Data="{Binding DownloadGeometry}" Stroke="{DynamicResource ChartDownloadLineBrush}" StrokeThickness="1.5">
+                                    <Path.Effect>
+                                        <DropShadowEffect Color="{DynamicResource ChartDownloadColor}" BlurRadius="10" Opacity="0.5" OffsetX="0" OffsetY="0"/>
+                                    </Path.Effect>
+                                </Path>
+                                
+                                <Path Data="{Binding UploadGeometry}" Stroke="{DynamicResource ChartUploadLineBrush}" StrokeThickness="1.5">
+                                    <Path.Effect>
+                                        <DropShadowEffect Color="{DynamicResource ChartUploadColor}" BlurRadius="10" Opacity="0.5" OffsetX="0" OffsetY="0"/>
+                                    </Path.Effect>
+                                </Path>
+                            </Canvas>
+                        </Viewbox>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="3"
+                    Margin="0,0,0,18"
+                    CornerRadius="12"
+                    Padding="14,10"
+                    Background="#3AC42B1C"
+                    IsVisible="{Binding HasError}">
+                <TextBlock Text="{Binding ErrorMessage}"
+                        FontSize="12"
+                        TextWrapping="Wrap"
+                        Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+            </Border>
+
+            <Border Grid.Row="4" Classes="card" Padding="0" MinHeight="200">
+                <Grid RowDefinitions="Auto, *">
+                    <Border Grid.Row="0"
+                            Padding="22,14"
+                            Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                            CornerRadius="18,18,0,0">
+                        <Grid ColumnDefinitions="*, 140, 140, 110, 110">
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding Loc[TrafficProcess]}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Loc[TrafficDownload]}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding Loc[TrafficUpload]}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            <TextBlock Grid.Column="3"
+                                       Text="Total ↓"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                            <TextBlock Grid.Column="4"
+                                       Text="Total ↑"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        </Grid>
+                    </Border>
+
+                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Items}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:TrafficItem">
                                 <Border Padding="22,10">
                                     <Grid ColumnDefinitions="*, 140, 140, 110, 110">
-
                                         <StackPanel Grid.Column="0"
                                                     Orientation="Horizontal"
                                                     Spacing="10"
@@ -275,15 +334,15 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </ScrollViewer>
 
-                <TextBlock Grid.Row="1"
-                           Text="{Binding Loc[TrafficNoData]}"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                           FontSize="13"
-                           IsVisible="{Binding !Items.Count}"
-                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-            </Grid>
-        </Border>
-    </Grid>
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding Loc[TrafficNoData]}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               FontSize="13"
+                               IsVisible="{Binding !Items.Count}"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

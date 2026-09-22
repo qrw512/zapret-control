@@ -63,6 +63,20 @@
                 <Color x:Key="SystemAccentColorLight2">#d5c8c5</Color>
                 <Color x:Key="SystemAccentColorLight3">#e5dbd9</Color>
 
+                <SolidColorBrush x:Key="ChartGridBrush" Color="#22141313"/>
+                <SolidColorBrush x:Key="ChartDownloadLineBrush" Color="#4A90D9"/>
+                <SolidColorBrush x:Key="ChartUploadLineBrush" Color="#D96AA0"/>
+                <LinearGradientBrush x:Key="ChartDownloadFillBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Offset="0" Color="#604A90D9"/>
+                    <GradientStop Offset="1" Color="#004A90D9"/>
+                </LinearGradientBrush>
+                <LinearGradientBrush x:Key="ChartUploadFillBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Offset="0" Color="#60D96AA0"/>
+                    <GradientStop Offset="1" Color="#00D96AA0"/>
+                </LinearGradientBrush>
+                <Color x:Key="ChartDownloadColor">#4A90D9</Color>
+                <Color x:Key="ChartUploadColor">#D96AA0</Color>
+
             </ResourceDictionary>
             <ResourceDictionary x:Key="Dark">
 
@@ -112,6 +126,20 @@
                 <Color x:Key="SystemAccentColorLight1">#83716d</Color>
                 <Color x:Key="SystemAccentColorLight2">#9e8c87</Color>
                 <Color x:Key="SystemAccentColorLight3">#b8a8a3</Color>
+
+                <SolidColorBrush x:Key="ChartGridBrush" Color="#22FFFFFF"/>
+                <SolidColorBrush x:Key="ChartDownloadLineBrush" Color="#88CCFF"/>
+                <SolidColorBrush x:Key="ChartUploadLineBrush" Color="#FF88CC"/>
+                <LinearGradientBrush x:Key="ChartDownloadFillBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Offset="0" Color="#6088CCFF"/>
+                    <GradientStop Offset="1" Color="#0088CCFF"/>
+                </LinearGradientBrush>
+                <LinearGradientBrush x:Key="ChartUploadFillBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Offset="0" Color="#60FF88CC"/>
+                    <GradientStop Offset="1" Color="#00FF88CC"/>
+                </LinearGradientBrush>
+                <Color x:Key="ChartDownloadColor">#88CCFF</Color>
+                <Color x:Key="ChartUploadColor">#FF88CC</Color>
 
             </ResourceDictionary>
 

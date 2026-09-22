@@ -202,7 +202,7 @@
                                                 <TextBlock Classes="card-title"
                                                            Text="{Binding Loc[BtnUpdateHosts]}"/>
                                                 <TextBlock Classes="card-desc"
-                                                           Text="{Binding Loc[IpUpdateHint]}"/>
+                                                           Text="{Binding Loc[HostUpdateHint]}"/>
                                             </StackPanel>
                                         </Grid>
 

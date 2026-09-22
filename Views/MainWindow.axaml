@@ -4,12 +4,15 @@
         xmlns:views="using:ZapretGui.Views"
         xmlns:models="using:ZapretGui.Models"
         xmlns:styling="using:Avalonia.Styling"
+        xmlns:controls="using:Avalonia.Controls"
         xmlns:conv="using:ZapretGui.Converters"
         xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Svg.Controls.Skia.Avalonia"
         x:Class="ZapretGui.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-        Title="Zapret Control" Width="1024" Height="600"
-        CanResize="False"
+        Title="Zapret Control"
+        Width="1024" Height="600"
+        MinWidth="1024" MinHeight="600"
+        CanResize="True"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
         WindowDecorations="BorderOnly"
@@ -108,13 +111,34 @@
             <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
         </Style>
 
+        <Style Selector="Button.caption">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.caption:pointerover">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseMediumLowBrush}"/>
+        </Style>
+
+        <Style Selector="Button.caption.close:pointerover">
+            <Setter Property="Background" Value="#E81123"/>
+        </Style>
+        <Style Selector="Button.caption.close:pointerover /template/ ContentPresenter">
+            <Setter Property="TextElement.Foreground" Value="White"/>
+        </Style>
+
     </Window.Styles>
 
     <Grid>
         <Grid RowDefinitions="36, *">
             <Grid Grid.Row="0"
                   Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"
-                  ColumnDefinitions="Auto, *, Auto, Auto"
+                  ColumnDefinitions="Auto, *, Auto, Auto, Auto"
                   PointerPressed="TitleBar_PointerPressed">
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="14,0" Spacing="8" VerticalAlignment="Center">
                     <Image Source="/Assets/app-white.png"
@@ -140,28 +164,43 @@
 
                 <Rectangle Grid.Column="1" Fill="Transparent"/>
 
-                <Button Grid.Column="2" Click="MinimizeButton_Click"
-                        Width="46" Height="36" Background="Transparent" CornerRadius="0" Padding="0"
-                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                    <Path Data="{StaticResource IconMinimize}"
-                          Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
-                          Width="12" Height="12" Stretch="Uniform"/>
+                <Button Grid.Column="2" Classes="caption"
+                        Click="MinimizeButton_Click"
+                        ToolTip.Tip="Свернуть">
+                    <svg:Svg Path="/Assets/ico/minus.svg"
+                             Width="12" Height="12"
+                             CurrentColor="{DynamicResource SvgIconColor}"
+                             Stretch="Uniform"/>
                 </Button>
 
-                <Button Grid.Column="3" Click="CloseButton_Click"
-                        Width="46" Height="36" Background="Transparent" CornerRadius="0" Padding="0"
-                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                    <Button.Styles>
-                        <Style Selector="Button:pointerover">
-                            <Setter Property="Background" Value="#E81123"/>
-                        </Style>
-                        <Style Selector="Button:pointerover /template/ ContentPresenter">
-                            <Setter Property="TextElement.Foreground" Value="White"/>
-                        </Style>
-                    </Button.Styles>
-                    <Path Data="{StaticResource IconClose}"
-                          Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
-                          Width="12" Height="12" Stretch="Uniform"/>
+                <Button Grid.Column="3" Classes="caption"
+                        Click="MaximizeButton_Click"
+                        ToolTip.Tip="Развернуть">
+                    <Panel>
+                        <svg:Svg Path="/Assets/ico/maximize.svg"
+                                 Width="12" Height="12"
+                                 CurrentColor="{DynamicResource SvgIconColor}"
+                                 Stretch="Uniform"
+                                 IsVisible="{Binding $parent[Window].WindowState,
+                                             Converter={x:Static ObjectConverters.NotEqual},
+                                             ConverterParameter={x:Static controls:WindowState.Maximized}}"/>
+                        <svg:Svg Path="/Assets/ico/minimize.svg"
+                                 Width="12" Height="12"
+                                 CurrentColor="{DynamicResource SvgIconColor}"
+                                 Stretch="Uniform"
+                                 IsVisible="{Binding $parent[Window].WindowState,
+                                             Converter={x:Static ObjectConverters.Equal},
+                                             ConverterParameter={x:Static controls:WindowState.Maximized}}"/>
+                    </Panel>
+                </Button>
+
+                <Button Grid.Column="4" Classes="caption close"
+                        Click="CloseButton_Click"
+                        ToolTip.Tip="Закрыть">
+                    <svg:Svg Path="/Assets/ico/x.svg"
+                             Width="12" Height="12"
+                             CurrentColor="{DynamicResource SvgIconColor}"
+                             Stretch="Uniform"/>
                 </Button>
             </Grid>
 
@@ -261,14 +300,10 @@
                                     VerticalContentAlignment="Center"
                                     IsEnabled="{Binding !IsAnyTestRunning}"
                                     ToolTip.Tip="{Binding Loc[PresetMenuTooltip]}">
-                                <Viewbox Width="14" Height="14" Stretch="Uniform"
-                                         HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Vertical" Width="4" Height="16">
-                                        <Ellipse Width="4" Height="4" Fill="{DynamicResource SystemControlForegroundBaseHighBrush}" Margin="0,0,0,2"/>
-                                        <Ellipse Width="4" Height="4" Fill="{DynamicResource SystemControlForegroundBaseHighBrush}" Margin="0,0,0,2"/>
-                                        <Ellipse Width="4" Height="4" Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-                                    </StackPanel>
-                                </Viewbox>
+                                <svg:Svg Path="/Assets/ico/ellipsis.svg"
+                                         Width="16" Height="16"
+                                         CurrentColor="{DynamicResource SvgIconColor}"
+                                         Stretch="Uniform"/>
                                 <Button.Flyout>
                                     <MenuFlyout>
                                         <MenuItem Header="{Binding Loc[MenuTestCurrent]}">
@@ -331,11 +366,6 @@
                                                     <TextBlock Text="Preset / BAT" FontSize="11"
                                                                Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
                                                 </StackPanel>
-                                                <Path Grid.Column="1"
-                                                      Data="{StaticResource IconChevronRight}"
-                                                      Fill="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                                                      Width="12" Height="12" Stretch="Uniform"
-                                                      VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -392,17 +422,17 @@
                                     <Border Classes="segmented" HorizontalAlignment="Center">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <RadioButton Classes="segment"
-                                                         GroupName="BypassMode"
-                                                         Content="{Binding Loc[BypassModeWhitelist]}"
-                                                         IsChecked="{Binding BypassModeIndex,
-                                                                     Converter={x:Static conv:IntEqualsConverter.Instance},
-                                                                     ConverterParameter=0}"/>
+                                                        GroupName="BypassMode"
+                                                        Content="{Binding Loc[BypassModeAll]}"
+                                                        IsChecked="{Binding BypassModeIndex,
+                                                                    Converter={x:Static conv:IntEqualsConverter.Instance},
+                                                                    ConverterParameter=1}"/>
                                             <RadioButton Classes="segment"
-                                                         GroupName="BypassMode"
-                                                         Content="{Binding Loc[BypassModeAll]}"
-                                                         IsChecked="{Binding BypassModeIndex,
-                                                                     Converter={x:Static conv:IntEqualsConverter.Instance},
-                                                                     ConverterParameter=1}"/>
+                                                        GroupName="BypassMode"
+                                                        Content="{Binding Loc[BypassModeWhitelist]}"
+                                                        IsChecked="{Binding BypassModeIndex,
+                                                                    Converter={x:Static conv:IntEqualsConverter.Instance},
+                                                                    ConverterParameter=0}"/>
                                         </StackPanel>
                                     </Border>
 
